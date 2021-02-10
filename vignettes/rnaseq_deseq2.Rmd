@@ -24,7 +24,7 @@ library(knitr) # for function "kable"
 ## Downloading a Count Matrix
 
 ```{r download_countdata}
-countfile_url <- "https://raw.githubusercontent.com/PacktPublishing/R-Bioinformatics-Cookbook/master/datasets/Chapter01/modencodefly_count_table.txt"
+countfile_url <- "https://raw.githubusercontent.com/PacktPublishing/R-Bioinformatics-Cookbook/master/datasets/ch1/modencodefly_count_table.txt"
 countfile <- "modencodefly_count_table.txt"
 if (!file.exists(countfile)) {
  download.file(countfile_url,countfile)
@@ -45,7 +45,7 @@ rownames(count_matrix) <- genes
 ## Downloading Phenotype Data
 
 ```{r download_phenotypes,message=FALSE, warning=FALSE}
-phenofile_url <- "https://raw.githubusercontent.com/PacktPublishing/R-Bioinformatics-Cookbook/master/datasets/Chapter01/modencodefly_phenodata.txt"
+phenofile_url <- "https://raw.githubusercontent.com/PacktPublishing/R-Bioinformatics-Cookbook/master/datasets/ch1/modencodefly_phenodata.txt"
 phenofile <- "modencodefly_phenodata.txt"
 if (!file.exists(phenofile)) {
  download.file(phenofile_url,phenofile)
@@ -77,7 +77,7 @@ grouping
 
 ```{r}
 library("DESeq2")
-dds <- DESeqDataSetFromMatrix(countData = counts_of_interest, 
+dds <- DESeqDataSetFromMatrix(countData = as.data.frame(counts_of_interest), 
                               colData = grouping,
                               design = ~ stage)
 ```

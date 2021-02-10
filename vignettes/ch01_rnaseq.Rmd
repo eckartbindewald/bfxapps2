@@ -21,7 +21,7 @@ library(knitr) # for function kable
 ## Count Tables
 
 ```{r downlod_count_data}
-countfile_url <- "https://raw.githubusercontent.com/PacktPublishing/R-Bioinformatics-Cookbook/master/datasets/Chapter01/modencodefly_count_table.txt"
+countfile_url <- "https://raw.githubusercontent.com/PacktPublishing/R-Bioinformatics-Cookbook/master/datasets/ch1/modencodefly_count_table.txt"
 countfile <- "modencodefly_count_table.txt"
 if (!file.exists(countfile)) {
  download.file(countfile_url,countfile)
@@ -57,7 +57,7 @@ head(count_matrix)
 ## Downloading Phenotype Data
 
 ```{r download_pheno_data}
-phenofile_url <- "https://raw.githubusercontent.com/PacktPublishing/R-Bioinformatics-Cookbook/master/datasets/Chapter01/modencodefly_phenodata.txt"
+phenofile_url <- "https://raw.githubusercontent.com/PacktPublishing/R-Bioinformatics-Cookbook/master/datasets/ch1/modencodefly_phenodata.txt"
 phenofile <- "modencodefly_phenodata.txt"
 if (!file.exists(phenofile)) {
  download.file(phenofile_url,phenofile)
