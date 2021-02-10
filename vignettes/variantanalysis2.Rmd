@@ -1,0 +1,18 @@
+---
+title: "Variant Analysis"
+author: "Eckart Bindewald"
+date: "2/23/2020"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r}
+library(GenomicRanges)
+library(gmapR)
+library(rtracklayer)
+library(VariantAnnotation)
+library(VariantTools)
+```

@@ -1,0 +1,21 @@
+---
+title: "StringMatch"
+output:
+  ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning=FALSE, message=FALSE)
+library(Biostrings)
+```
+
+## Pattern Match
+
+```{r}
+
+genome_str = "CTTCTTCTTTCCGCCGTCATATAAATCTTCACTTTGGGGCTGACTGTGGGAAGTGGGTATATAAATTTGAGTACC"
+genome <- Biostrings::DNAString(genome_str)
+patterns <- c("GTGGGTA","TATAAAT","TATAAAT")
+Biostrings::matchPattern(patterns[1], genome_str)
+```
+

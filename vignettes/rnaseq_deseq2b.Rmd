@@ -1,0 +1,21 @@
+---
+title: "RNA-Seq Processing With DESeq2"
+author: "Eckart Bindewald"
+date: "2/11/2020"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r}
+count_dataframe <- readr::read_tsv(file.path(getwd(), "datasets",
+"ch1", "modencodefly_count_table.txt" ))
+genes <- count_dataframe[['gene']]
+count_dataframe[['gene']] <- NULL
+count_matrix <- as.matrix(count_dataframe)
+rownames(count_matrix) <- genes
+pheno_data <- readr::read_table2(file.path(getwd(), "datasets",
+"ch1", "modencodefly_phenodata.txt"))
+```

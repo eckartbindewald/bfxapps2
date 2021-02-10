@@ -1,0 +1,1 @@
+cat 6LU7_A.fasta.txt mainprotease_sarscov.fa mainprotease_mhv.fa mainprotease_tgev.fa mainprotease_hcov.fa mainprotease_ibv.fa > mainprotease_betacov.fasta

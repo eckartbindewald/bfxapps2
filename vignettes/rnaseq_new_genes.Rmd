@@ -1,0 +1,94 @@
+---
+title: "Finding New Genes"
+author: "Eckart Bindewald"
+date: "1/26/2020"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message=FALSE)
+```
+
+## Preliminaries
+
+```{r warning=FALSE}
+library(GenomicRanges) # for class GRange
+library(rtracklayer) # for function import.gff
+library(knitr) # for function kable
+if (!require("csaw")) {
+  BiocManager::install("csaw")
+}
+```
+
+## Helper Function
+```{r}
+get_annotated_regions_from_gff <- function(file_name) {
+gff <- rtracklayer::import.gff(file_name)
+as(gff, "GRanges")
+}
+```
+
+## Downloading Data
+
+```{r}
+# original: file.path(getwd(), "datasets", "ch1", "windows.bam"),
+urldir <- "https://raw.githubusercontent.com/PacktPublishing/R-Bioinformatics-Cookbook/master/datasets/Chapter01"
+bamname <- "windows.bam"
+bainame <- "windows.bam.bai"
+if (!file.exists(bamname)) {
+  download.file(file.path(urldir,bamname),bamname)
+}
+if (!file.exists(bainame)) {
+  download.file(file.path(urldir,bainame),bainame)
+}
+```
+
+```{r}
+annoname <- "genes.gff"
+annourl <- file.path(urldir, "genes.gff")
+if (!file.exists(annoname)) {
+  download.file(annourl, annoname)
+}
+annotated_regions <- get_annotated_regions_from_gff(annoname)
+kable(head(annotated_regions))
+```
+
+## Reading File
+
+```{r}
+whole_genome <- csaw::windowCounts(
+bamname,
+bin = TRUE,
+filter = 0,
+width = 500,
+param = csaw::readParam(
+minq = 20,
+dedup = TRUE,
+pe = "both"
+)
+)
+```
+
+## Find Overlaps with Existing Annotations
+
+```{r}
+library(IRanges)
+library(SummarizedExperiment)
+windows_in_genes <-IRanges::overlapsAny(
+SummarizedExperiment::rowRanges(whole_genome), annotated_regions )
+windows_in_genes
+```
+
+## Distinguish Annotated and non-Annotated Regions
+
+```{r}
+annotated_window_counts <- whole_genome[windows_in_genes,]
+non_annotated_window_counts <- whole_genome[ ! windows_in_genes,]
+```
+
+## Looking at Data That Corresponds to Non-annotated Regions
+
+```{r}
+head(non_annotated_window_counts)
+colData(non_annotated_window_counts)
+```

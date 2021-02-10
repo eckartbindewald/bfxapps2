@@ -1,0 +1,96 @@
+---
+title: "RNA-Seq and DESeq2"
+author: "Eckart Bindewald"
+date: "1/26/2020"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message=FALSE)
+```
+
+## The Bioconductor Package DESeq2
+
+* DESeq2 is an R/Bioconductor package
+* Provided by Michael Love and Raphael Irizarri
+
+```{r warning=FALSE,message=FALSE}
+if (!require("DESeq2")) {
+  BiocManager::install("DESeq2")
+}
+library(knitr) # for function "kable"
+```
+
+## Downloading a Count Matrix
+
+```{r download_countdata}
+countfile_url <- "https://raw.githubusercontent.com/PacktPublishing/R-Bioinformatics-Cookbook/master/datasets/Chapter01/modencodefly_count_table.txt"
+countfile <- "modencodefly_count_table.txt"
+if (!file.exists(countfile)) {
+ download.file(countfile_url,countfile)
+}
+count_dataframe <- readr::read_tsv(countfile)
+kable(head(count_dataframe))
+```
+
+## Converting the Data Frame to a Matrix
+
+```{r convert_counts}
+genes <- count_dataframe[['gene']]
+count_dataframe[['gene']] <- NULL
+count_matrix <- as.matrix(count_dataframe)
+rownames(count_matrix) <- genes
+```
+
+## Downloading Phenotype Data
+
+```{r download_phenotypes,message=FALSE, warning=FALSE}
+phenofile_url <- "https://raw.githubusercontent.com/PacktPublishing/R-Bioinformatics-Cookbook/master/datasets/Chapter01/modencodefly_phenodata.txt"
+phenofile <- "modencodefly_phenodata.txt"
+if (!file.exists(phenofile)) {
+ download.file(phenofile_url,phenofile)
+}
+pheno_data <- readr::read_table2(phenofile)
+kable(head(pheno_data))
+```
+
+## Specifying Experiments of Interest
+
+```{r exp_of_interest}
+experiments_of_interest <- c("L1Larvae", "L2Larvae")
+columns_of_interest <- which( pheno_data[['stage']] %in%
+experiments_of_interest )
+counts_of_interest <- count_matrix[,columns_of_interest]
+kable(head(counts_of_interest))
+```
+
+## Create Factors Corresponding to Groups
+
+```{r factors_for_groups}
+library(magrittr)
+grouping <- pheno_data[['stage']][columns_of_interest] %>%
+forcats::as_factor()
+grouping
+```
+
+## Build the DESeq Object
+
+```{r}
+library("DESeq2")
+dds <- DESeqDataSetFromMatrix(countData = counts_of_interest, 
+                              colData = grouping,
+                              design = ~ stage)
+```
+
+## Perform Computation
+
+```{r run_deseq}
+dds <- DESeq(dds)
+```
+
+## Extract Results
+
+```{r extract_results}
+# res <- results(dds, contrast=c("stage","L2Larvae","L1Larvae"))
+# head(res)
+```

@@ -1,0 +1,138 @@
+---
+title: "Processing RNA-Seq Data"
+author: "Eckart Bindewald"
+date: "1/15/2020"
+output:
+  ioslides_presentation:
+    smaller: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message = FALSE)
+```
+
+## Preliminaries
+
+```{r}
+library(readr) # 
+library(knitr) # for function kable
+```
+
+## Count Tables
+
+```{r downlod_count_data}
+countfile_url <- "https://raw.githubusercontent.com/PacktPublishing/R-Bioinformatics-Cookbook/master/datasets/Chapter01/modencodefly_count_table.txt"
+countfile <- "modencodefly_count_table.txt"
+if (!file.exists(countfile)) {
+ download.file(countfile_url,countfile)
+}
+count_dataframe <- readr::read_tsv(countfile)
+head(count_dataframe)
+```
+
+## Converting Count Table to Matrix
+
+```{r}
+genes <- count_dataframe[['gene']]
+count_dataframe[['gene']] <- NULL # keep only numbers or matrix will not work
+count_matrix <- as.matrix(count_dataframe)
+rownames(count_matrix) <- genes
+head(count_matrix)
+```
+
+## A Bug waiting to happen
+
+* Things seem fine, but what is wrong with variable `count_matrix`?
+* Find out if it is numeric data using R function `typeof`
+* How can we fix this problem?
+
+## A NUMERIC Count Matrix
+
+```{r}
+# typeof(count_matrix)
+# count_matrix <- as.numeric(count_matrix)
+# typeof(count_matrix)
+```
+
+## Downloading Phenotype Data
+
+```{r download_pheno_data}
+phenofile_url <- "https://raw.githubusercontent.com/PacktPublishing/R-Bioinformatics-Cookbook/master/datasets/Chapter01/modencodefly_phenodata.txt"
+phenofile <- "modencodefly_phenodata.txt"
+if (!file.exists(phenofile)) {
+ download.file(phenofile_url,phenofile)
+}
+pheno_data <- readr::read_table2(phenofile)
+```
+
+## Phenotype Data
+```{r}
+kable(pheno_data)
+```
+
+## Focusing on Specific Experiments
+
+```{r}
+experiments_of_interest <- c("L1Larvae","L2Larvae")
+columns_of_interest <- which(pheno_data[['stage']] %in% experiments_of_interest)
+columns_of_interest
+```
+
+## Grouping 
+
+```{r}
+library(magrittr)
+grouping <- pheno_data[['stage']][columns_of_interest] %>% forcats::as_factor()
+grouping
+```
+
+## Updated Count Matrix
+
+```{r}
+counts_of_interest <- count_matrix[,columns_of_interest]
+counts_of_interest
+```
+
+## Differential Gene Expression (DGE) Object
+
+```{r}
+library(edgeR)
+count_dge <- edgeR::DGEList(counts=counts_of_interest,group=grouping)
+count_dge
+```
+
+
+## Differential Gene Expression (DGE) Object
+
+```{r echo=FALSE}
+count_dge
+```
+
+## Dispersion as deviation from Poisson Process
+
+For a simple Poisson process we expect the variance to be equal to the mean:
+
+$$Var(count) = \mu$$ 
+
+Variation in biological high-throughput experiments tends to be larger. One can model this using a square term and the "dispersion":
+
+$$Var(count) = \mu + dispersion * \mu^2$$
+
+```{r}
+citation("edgeR")
+```
+
+## Model Matrix
+
+```{r}
+design <- model.matrix(~ grouping)
+eset_dge <- edgeR::estimateDisp(count_dge, design)
+fit <- edgeR::glmQLFit(eset_dge, design)
+result <- edgeR::glmQLFTest(fit, coef=2)
+```
+
+## Results
+
+```{r}
+topTags(result)
+```

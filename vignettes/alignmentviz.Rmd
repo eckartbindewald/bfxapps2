@@ -1,0 +1,92 @@
+---
+title: "Alignment Visualization"
+author: "Eckart Bindewald"
+date: "4/7/2020"
+output:
+  powerpoint_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE)
+```
+
+## Downloading Data
+
+```{r}
+remote_folder="https://raw.githubusercontent.com/PacktPublishing/R-Bioinformatics-Cookbook/master/datasets/Chapter04"
+fa_file = "bhlh.fa"
+if (!file.exists(fa_file)) {
+  download.file(file.path(remote_folder,fa_file),fa_file)
+}
+stopifnot(file.exists(fa_file))
+```
+
+
+## Reading A Sequence Alignment
+
+* Uses readAAStringSet function from Biostrings (AA for AminoAcid sequences)
+* Analogous: readDNAStringSet, readRNAStringSet
+
+```{r}
+library(Biostrings)
+seqs <- readAAStringSet(fa_file)
+```
+
+## An Amino acid Sequence Alignment
+
+```{r}
+seqs
+```
+
+## seqinr: A specialized R package for Sequence Alignments
+
+```{r}
+library(seqinr)
+# devtools::install_github("evolvedmicrobe/dotplot",build_vignettes=FALSE)
+```
+
+## Creating a Basic Dot Plot
+
+* Unfortunately, the function "dotPlot" needs not strings but vectors of individual characters
+* Need workaround to convert string of amino acid sequence characters to individual characters
+
+```{r}
+library(ggplot2)
+library(seqinr) # use BiocManager::install()
+chars1 <- strsplit(as.character(seqs[[1]]),split="")[[1]]
+chars2 <- strsplit(as.character(seqs[[2]]),split="")[[1]]
+chars3 <- strsplit(as.character(seqs[[3]]),split="")[[1]]
+head(chars1)
+```
+
+
+## A Basic Dot Plot
+
+```{r}
+seqinr::dotPlot(chars1, chars2)
+```
+
+## A More Useful Dotplot using Sequence-Windows
+
+```{r}
+par(mfrow=c(1,2))
+dotPlot(chars1, chars1, wsize=10,nmatch=7)
+dotPlot(chars1, chars3, wsize=10,nmatch=7)
+# dotPlot(chars2, chars3, wsize=10,nmatch=7)
+```
+
+## Creating Dot Plots
+
+Consider the sequence alignment provided at https://raw.githubusercontent.com/PacktPublishing/R-Bioinformatics-Cookbook/master/datasets/Chapter04/bhlh.fa .Download this alignment and ensure that it is located in the current working directory of your R script so that it can be read with the filename "bhlh.fa". Optionally, the download step can be part of your R script using the function download.file, but you can alternatively download this file manually.
+a) Use the readAAStringSet function from the Biostrings R package to read in this alignment and store the result in variable name sqs
+b) Convert each of the 3 amino acid sequences to 3 character vectors (called chars1, chars2, chars3) so that each vector element corresponds to one amino acid
+c) Use the function dotPlot from R package seqinr in to visualize a dot-plot corresponding to 2 and 3
+d) Issue the command par(mfrow=c(1,2)) in order to create a layout such that new plots will be arranged in a grid consisting of 1 row and 2 columns. Next issue dotPlot commands corresponding first to sequences 1 and 2 and next a dotPlot corresponding to sequences 1 and 3. This should results in two dot-plots shown side-by-side.
+
+
+## Summary
+
+* Dot-plots are useful visualizations of sequence alignments
+* function dotPlot from R package seqinr can create dot-plots
+* Function needs vectors of individual characters (needs workaround)
+* Function most useful with non-default value for window size

@@ -1,0 +1,201 @@
+---
+title: "Poisson Distribution"
+author: "Eckart Bindewald"
+date: "1/18/2020"
+output:
+  ioslides_presentation: default
+  beamer_presentation: default
+  powerpoint_presentation: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE)
+```
+
+## Motivation
+
+* Every year people die due to horse kicks
+* Before 20th century, deaths due to horse kicks were of concern to armed forces
+* Russian economist and statistician Ladislaus Bortkiewicz published a book "The Law of Small Numbers" (1898)
+* He showed that data from the Prussian army of annual deaths of soldiers due to horse kicks follow a certain distribution: The Poisson Distribution
+
+## Preliminaries
+
+* The "Prussian Army horse kick data" is available in R package pscl
+* R package related to political science
+
+```{r}
+if (!require(pscl)) { 
+  install.packages("pscl")
+}
+data(prussion) # the actual data
+```
+
+## Usual Suspects
+
+```{r}
+library(knitr)
+library(ggplot2)
+library(ggpubr)
+```
+
+## Look at Some Data
+
+```{r}
+knitr::kable(prussian[seq(1,100,11),])
+```
+
+## Look at Some Data
+
+```{r}
+knitr::kable(summary(prussian))
+```
+
+## Horse Kick Data Data again
+
+* Observations for 6 different Army "corps"
+* Observations corresponding to one number per corp per year
+* Tracked over 20 years (1875-1894)
+
+## Data Summary of Horse Kick Data
+
+```{r}
+knitr::kable(summary(prussian))
+```
+
+## What data shows
+
+* For each "corp" of the Prussion army, the variable `y` corresponds to the number of deaths observed in a certain year
+* 
+
+## Histogram Horse Kick Data
+
+```{r}
+ggpubr::gghistogram(data=prussian,x="y",xlab="Events",ylab="Count")
+```
+
+## Computing Mean and Variance
+
+* In R terminal, load library "pscl" and data set "prussian"
+* Compute the mean of count variable y
+* Compute the variance of count variable y (function "var")
+* What do you notice?
+
+## Formula for Possion Distribution
+
+$$P(k \text{ events in interval})=e^{-\frac{\text{events}}{\text{unit}}\text{interval}}\frac{(\frac{\text{events}}{\text{unit}}\text{interval})^k}{k!}$$
+Often the term $\frac{\text{events}}{\text{unit}}\text{interval}$ is set to a variable such as $\lambda$:
+$$P(k \text{ events in interval})=e^{-\lambda}\frac{\lambda^k}{k!}$$
+
+## Apply Formula to Horse Kick Data
+
+* We need to figure of mean rate ($\frac{\text{events}}{\text{unit}}$)
+* Here: "unit" is the unit of 1 year
+* Here: Number of events = number of deaths
+* Use R function mean to compute the mean number of events per time unit
+
+## Mean Rate of Events
+
+```{r}
+r = mean(prussian$y)
+r
+```
+
+So for a time interval length of 1 (=1 year), the the value lambda is r*1 = r = `r r`
+
+
+
+## Lets define a function
+
+```{r}
+lambda = r * 1 # rate r times time interval
+knitr::kable(dpois(0:5, lambda = lambda))
+```
+
+## Plotting Found Probability
+
+```{r}
+v <- 0:5
+df <- data.frame(cbind(k=v,P=dpois(0:5, lambda = lambda)))
+```
+
+## Compare to Original Data
+
+```{r}
+ggplot(data=prussian,aes(x=y)) + geom_histogram(aes(y = stat(count / sum(count)))) + 
+  xlab("Events") + ylab("Normalized Count") +
+  geom_point(aes(x=k,y=P),data=df,size=2,color="red") + theme_pubclean()
+```
+
+## Exercise
+
+* You find out that your favourite cheese cake has on average 3 raisins per slice
+* Assume that distributing raisons on a cake are random independent events
+* Use R function `dpois` to compute the probability of having a slice of cake with exactly one raisin
+* Use R function `dpois` to compute the probability of having a slice of cake with zero raisins
+* Add the two last values to compute the probability of having a slice of cake with 0 or 1 raisins. Use R function ppois to compute the same value.
+* What is the probability of having 2 or more raisins in a slice of cheese cake?
+
+## Exercise 
+
+How do the data counts and the Poisson model change if a time interval of 2 years is used in the Prussian horse kick data?
+
+a) Generate a new data frame called prussian2 that contains for each corp 10 rows with each row corresponding to 2 consecutive years
+b) Plot a histogram of the number of events occurring in 2-year intervals
+c) Compute an updated value of lambda
+d) Using function dpois, compute a vector of Poisson model probabilities for k=0 to 10
+e) Add points of modelled probabilities to the histogram plotted in b)
+f) Code your alternative R implementation of the function dpois that takes a vector of k values and a value of lambda as input and returns probabilities according to a Poisson distribution
+
+## Nicer Output with R package broom
+
+* Many built-in R functions have non-standard output
+* Difficult to incorporate into tables
+* Difficult to print
+* Solution: R package "broom" with function "tidy"
+
+```{r}
+if (!require(broom)) {
+  install.packages("broom")
+}
+```
+
+## Poisson Regression
+
+```{r}
+m1 <- glm(y ~ ., family="poisson", data=prussian) # model
+kable(broom::tidy(m1))
+```
+
+## Poisson Regression
+
+```{r}
+m1 <- glm(y ~ corp, family="poisson", data=prussian) # movel
+kable(broom::tidy(m1))
+```
+
+
+## Variance and Mean of Poisson Distribution
+
+* The mean of the horse kick data is `r mean(prussian$y)`
+* [This many soldiers died of horse kicks that year in an army corp]
+* The variance of the horse kick data is `r var(prussian$y)`
+* The variance is approximately similar to the mean!
+
+## General property: Mean and Variance Are Equal
+
+__The expected value and variance of a Poisson-distributed random variable are both equal to $\lambda$__
+
+The statistical error (=standard deviation) of is equal to the square root of the expected values of the count: $\sigma=\sqrt{N}$
+
+## Exercise
+
+* You observe 4 shooting stars in one hour of observing the night sky. What is the expected variance and standard deviation of this count if you would repeat it over the same time duration?
+* In an RNA-Seq experiment, one finds that 9 reads are mapping to a certain gene. Assuming that such counts follow a Poisson distribution, what is the variance and the standard deviation one expects when repeating this experiment?
+
+## For Large Counts, The Poisson Distribution Approximates Normal Distribution
+
+```{r}
+# include_graphics("")
+```
+

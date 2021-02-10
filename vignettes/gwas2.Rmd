@@ -1,0 +1,120 @@
+---
+title: "Visualizing Genome-Wide Association Studies"
+author: "Eckart Bindewald"
+date: "3/29/2020"
+output:
+  powerpoint_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message=FALSE)
+```
+
+## Preliminaries
+
+```{r}
+if (!require(qqman)) {
+  install.packages("qqman")
+}
+library(qqman)
+library(knitr)
+```
+
+## GWAS Results
+
+```{r}
+kable(head(gwasResults,n=20))
+```
+
+## GWAS Results
+
+```{r}
+kable(tail(gwasResults,n=20))
+```
+
+
+## GWAS Results
+
+```{r}
+kable(tail(gwasResults,n=20))
+```
+## Count of SNPs per Chromosome
+
+```{r}
+as.data.frame(table(gwasResults$CHR))
+```
+
+
+## Manhattan Plots
+
+```{r}
+manhattan(gwasResults)
+```
+
+## Manhattan Plots
+
+```{r}
+manhattan(gwasResults, col=cm.colors(22))
+```
+
+
+## Focusing on Most Interesting Region
+
+* Chromosome 3 has highest peak (table column "CHR")
+* Use R package dplyr and filter function
+
+```{r}
+library(dplyr)
+manhattan(gwasResults %>% filter(CHR==3), col=cm.colors(22))
+```
+
+## Color Palette for 26 Chromosomes (1-22, X,Y,M)
+
+```{r}
+library(ggsci)
+library(scales)
+# scales::show_col(ggsci::pal_ucscgb("default")(26),cex_label=1)
+```
+
+## Manhattan Plots
+
+```{r}
+manhattan(gwasResults, col=cm.colors(22))
+```
+
+
+## Focusing on Most Interesting Region
+
+```{r}
+library(dplyr)
+mycolors <- ggsci::pal_ucscgb("default")(22)
+manhattan(gwasResults, col=mycolors)
+```
+
+## Focusing on Most Interesting Region
+
+```{r}
+library(dplyr)
+
+manhattan(gwasResults %>% filter(CHR==3))
+```
+
+## Focusing on Most Interesting Region
+
+```{r}
+library(dplyr)
+
+manhattan(gwasResults %>% filter(CHR==3),xlim=c(300,400), annotatePval = TRUE)
+```
+
+## Connect to R package rrBLUP
+
+* We used R package rrBLUP to create GWAS P-values
+* Our R function "manhattan" expects specific column formats
+* Needed columns: SNP, CHR, BP, P
+* Given columns: marker, chrom, pos, score
+* Write a function that converts between those formats!
+
+```{r include=FALSE}
+# gresult2 <- (gresult %>% rename(SNP=marker,CHR=chrom,BP=pos) %>% mutate(CHR=as.numeric(as.character(CHR)), P=(1-pnorm(score))) %>% select(SNP,CHR,BP,P))
+```

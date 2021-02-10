@@ -1,0 +1,120 @@
+---
+title: "Batch Effects and Confounding"
+author: "Eckart Bindewald"
+date: "1/28/2020"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE)
+```
+
+## Batch Effects
+
+"The batch effect represents the systematic technical differences when samples are processed and measured in different batches and which are unrelated to any biological variation [...]"
+
+Leek JT, Johnson WE, Parker HS, Jaffe AE, Storey JD. The sva package for
+removing batch effects and other unwanted variation in high-throughput
+experiments. Bioinformatics. 2012 
+
+## Examples of Batch Effects
+
+* Laboratory conditions
+* Choice of reagent lot or batch
+* Personnel differences
+* Time of day when the experiment was conducted
+* Atmospheric ozone levels
+* Instruments used to conduct the experiment
+
+## Simpson's Paradox
+
+* Data from UC Berkely Admissions Office (1973)
+* Lhe chance of being admitted among the applicants was higher for men then women
+* Led to law suit claiming discrimination
+
+## Berkely Admission Data in R
+
+3D Dataset of [Admitted/Rejected,Male/Female,Department A-F]
+
+```{r}
+UCBAdmissions
+```
+
+## Summing over Departments
+
+```{r}
+apply(UCBAdmissions, c(1, 2), sum)
+```
+
+## Exercise using Dataset UCBAdmissions
+
+* How many men applied in 1973?
+* How many women applied in 1973?
+* How many men (women) were accepted?
+* Compute the chance of being admitted for male and for female applicants using dataset UCBAdmissions
+
+## Mosaic Plots
+
+```{r}
+mosaicplot(apply(UCBAdmissions, c(1, 2), sum),
+           main = "Student admissions at UC Berkeley")
+```
+
+## Exercise
+
+* Create mosaic plots for the individual departments A,B,...,F
+* If needed, you can obtain help in R via ?UCBAdmissions
+* Is there a gender-bias trend that is consistent for all departments?
+* What could be an explanation leading to the observed apparent bias in the aggregated data?
+
+## Confounding
+
+Definition: 
+
+* Correlation is not causation
+* Sometimes X ~ Y (correlation) because causation due to other variable Z: X~Z and Y~Z
+* We say Z is a confounding variable
+
+## Downloading Data
+
+```{r}
+if (!require(sva)) {
+  BiocManager::install("sva")
+  require(sva)
+}
+arafile <- "arabidopsis.RDS"
+url <- paste0("https://github.com/PacktPublishing/R-Bioinformatics-Cookbook/blob/master/datasets/Chapter01/", arafile,"?raw=true")
+if (!file.exists(arafile)) {
+  download.file(url, arafile)
+}
+arab <- readRDS(arafile)
+```
+
+## Filtering out Rows
+
+```{r}
+keep <- apply(arab, 1, function(x) { length(x[x>3])>=2 } )
+arab_filtered <- arab[keep,]
+```
+
+## Creating the Initial Design
+
+```{r}
+groups <- as.factor(rep(c("mock", "hrcc"), each=3))
+```
+
+## Test and Null Models
+
+```{r}
+test_model <- model.matrix(~groups)
+null_model <- test_model[,1]
+svar <- svaseq(arab_filtered, test_model, null_model, n.sv=1)
+```
+
+## Extract the surrogate variables
+
+```{r}
+design2 <- cbind(test_model, svar$sv)
+design2
+```
+

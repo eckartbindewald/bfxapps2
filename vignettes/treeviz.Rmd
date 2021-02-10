@@ -1,0 +1,74 @@
+---
+title: "Visualizing Trees"
+author: "Eckart Bindewald"
+date: "3/31/2020"
+output:
+  powerpoint_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE)
+```
+
+## R Markdown
+
+```{r}
+library(ape)
+library(ggplot2)
+if (!require(ggtree)) {
+  BiocManager::install("ggtree")
+}
+library(ggtree)
+remote_folder="https://raw.githubusercontent.com/PacktPublishing/R-Bioinformatics-Cookbook/master/datasets/Chapter04"
+vcf_file = "itol.nwk" # mammal_tree.nwk"
+remote_file=file.path(remote_folder,vcf_file)
+if (!file.exists(vcf_file)) {
+  download.file(remote_file,vcf_file)
+}
+stopifnot(file.exists(vcf_file))
+itol <- ape::read.tree(vcf_file)
+itol
+```
+
+## Creating a Basic Tree Plot
+
+```{r}
+ggtree(itol)
+```
+
+## Rotate and Invert Tree:
+
+```{r}
+ggtree(itol) + coord_flip() + scale_x_reverse()
+```
+
+## Add Labels to the Tips
+
+```{r}
+gwithtips <- ggtree(itol) + geom_tiplab(color="blue", size=0.9)
+print(gwithtips)
+pdf("iol_tips.pdf")
+print(gwithtips)
+dev.off()
+```
+
+## Circular Layout
+
+```{r}
+ggtree(itol, layout="circular")
+```
+
+## Highlight particular region
+
+```{r}
+ggtree(itol, layout="circular") + geom_strip(13,14,color="red", barsize=1)
+```
+
+## Highlight Particular Clade
+
+```{r}
+# needs lots of memory:
+# ggtree(itol, layout="unrooted") + geom_highlight_encircle(node=11, fill="blue")
+```
+
+

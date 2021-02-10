@@ -1,0 +1,98 @@
+---
+title: "Whole-Genome Alignments"
+author: "Eckart Bindewald"
+date: "4/14/2020"
+output:
+  ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE)
+```
+
+## R Library Decipher
+
+```{r}
+if (!require(DECIPHER)) {
+  BiocManager::install("DECIPHER")
+}
+library(DECIPHER)
+```
+
+## Download Data
+
+```{r}
+remote_folder="/Users/eckart/rstudio/bfxapps2/inst/extdata/coronaviridae"
+# https://raw.githubusercontent.com/PacktPublishing/R-Bioinformatics-Cookbook/master/datasets/Chapter03"
+fa_file = file.path(remote_folder,"coronaviridae.fasta") # "plastid_genomes.fa"
+# if (!file.exists(fa_file)) {
+#  download.file(file.path(remote_folder,fa_file),fa_file)
+# }
+stopifnot(file.exists(fa_file))
+```
+
+## Reading DNA Sequences
+
+```{r}
+library(Biostrings)
+seqs <- readDNAStringSet(fa_file)
+seqs
+```
+
+## Prepare Local "Indices"
+
+```{r}
+sequence_names <- unlist(lapply(strsplit(names(seqs),split=" "),FUN=function(x){x[1]}))
+Seqs2DB(seqs, "XStringSet", "corona_db", sequence_names, replaceTbl = TRUE)
+
+```
+
+## Find Synteny
+
+```{r}
+synteny = FindSynteny("corona_db")
+pairs(synteny)
+```
+
+
+## Plot Syntenic Blocks
+
+```{r}
+plot(synteny)
+```
+
+## Align Syntenic Blocks
+
+```{r}
+alignment = AlignSynteny(synteny, "corona_db")
+```
+
+## Save Pairwise Alignments
+
+```{r}
+blocks = unlist(alignment[[1]])
+writeXStringSet(blocks, "corona_blocks_out.fa")
+```
+
+## Let's readin GFF File and Look for Gene Coordinates
+
+```{r}
+library(dplyr)
+library(rtracklayer)
+gff_file=file.path(remote_folder,"GCF_009858895.2_ASM985889v3_genomic.gff")
+gff <- rtracklayer::readGFF(gff_file)
+
+```
+
+## S-Protein: Using columns gene, type, start end
+
+```{r}
+ids = which(gff$gene == "S")
+gff[ids,c("start","end","type","gene")]
+```
+
+## Let's take a look at similarities for SARS and SARS-Cov-2
+
+```{r}
+synteny[1,2][[1]]%>% as.data.frame() %>% filter(start1 >= 21563 & start1 <= 25384)
+```

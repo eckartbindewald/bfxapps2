@@ -1,0 +1,77 @@
+---
+title: "Multiple Sequence Alignments"
+author: "Eckart Bindewald"
+date: "2/11/2020"
+output:
+  ioslides_presentation:
+    smaller: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE)
+```
+
+## R Package "muscle"
+
+* Performs multiple sequence alignments on DNA or protein sequences
+* Similar accuracy to program ClustalW but faster
+* Edgar RC (2004). “MUSCLE: multiple sequence alignment with high accuracy and high throughput.” Nucleic Acids Research
+
+```{r}
+library(muscle)
+```
+
+
+## Prepared Unaligned Sequences
+
+```{r}
+umax
+```
+
+## Aligning Sequences
+
+```
+result <- muscle(umax,diags=TRUE)
+```
+
+## R Class DNAMultipleAlignment
+
+* Stores Results of Multiple Sequence Alignments
+* Core class in Biostrings R package
+* <https://www.bioconductor.org/packages/devel/bioc/vignettes/Biostrings/inst/doc/MultipleAlignments.pdf>
+
+## Aligned Sequences
+
+```{r include=FALSE}
+result <- muscle(umax,diags=TRUE)
+```
+
+```{r}
+result
+```
+
+## Alphabet Frequency
+
+```{r}
+alphabetFrequency(result)
+```
+
+## Consensus Matrix
+
+```{r}
+consensusMatrix(result)[,1:12]
+```
+
+## Consensus Matrix
+
+```{r}
+consensusMatrix(result)[1:4,1:12]
+```
+
+## Tree Similarity
+
+```{r}
+sdist <- stringDist(as(result,"DNAStringSet"), method="hamming")
+clust <- hclust(sdist, method = "single")
+plot(clust)
+```

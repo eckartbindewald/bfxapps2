@@ -1,0 +1,58 @@
+---
+title: "BFX553 Homework 1"
+author: "Eckart Bindewald"
+date: "2/04/2020"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 1. Prussion Horse Kick Data
+
+How do the data counts and the Poisson model change if a time interval of 2 years is used in the Prussian horse kick data?
+
+a) Generate a new data frame called prussian2 that contains for each corp 10 rows with each row corresponding to 2 consecutive years
+b) Plot a histogram of the number of events occurring in 2-year intervals
+c) Compute an updated value of lambda
+d) Using function dpois, compute a vector of Poisson model probabilities for k=0 to 10
+e) Add points of modelled probabilities to the histogram plotted in b)
+f) Code your alternative R implementation of the function dpois that takes a vector of k values and a value of lambda as input and returns probabilities according to a Poisson distribution
+
+## 2. Generate and Process a Count Matrix
+
+In class we manually created a count matrix for simulated reads of our mock genome with 2 genes. Now write code that automates this process. You can copy-paste code from file "mockgenome.Rmd" in order to recreate the fragment sets. Remember to not change the random number set (command set.seed in beginning of that file) in order to not change the created random fragments.
+Alternatively use can use the command `data(rnaseq_mock)` to arrive at the same content.
+Careful: in both cases the order of the fragments is not shuffled (fragments originating from gene1 are stored before those from gene2 etc). 
+
+a) Shuffle the order of the fragments for case and control seperately and store result in new datastructure
+b) Create a data structure that containts separate slots for experiments corresponding to four technical repeats with each dataset consisting of 10 reads.
+c) Create a count matrix with 2 rows corresponding to 2 genes and 2x4 = 8 columns corresponding to 4 technical repeats for case and control
+d) For each row compute a t-test (R function t.test) with 2 groups corresponding to 4 values from the technical repeats. For which gene is evidence for a change in gene expression of the case versus control?
+e) Use the edgeR package as shown in class in order to obtain a rank-ordered list of genes with their evidence for a change in gene expression
+f) For each row compute a Poisson-test (R function poisson.test) with 2 groups corresponding to 4 values from the technical repeats. For which gene is evidence for a change in gene expression of the case versus control?
+
+## 3. Applying RNA-Seq Experiments to Drosophila Genome Release 6
+
+For this exercise you should mainly use the Bioinformatics server (IP address 144.175.88.21).
+In class we analyzed the "hypergravity" RNA-Seq experiments by alignment paired-end reads to the provided Drosophila melanogaster reference genome release 3 (synonym "dm3"). 
+The homework is now to repeat this analysis using the more up-to-date Drosophila genome assembly release 6 (synonyms "dm6" or "Dmel6").
+
+a) Prepare reference genome. Log into 144.175.88.21. Find the reference genome under `/home/bindewald/genomics/dm6/dmel-all-chromosome-r6.31.fasta`
+Look at some of the content with Unix program "more". Obtain a list of sequence names using Unix program `grep ">"`. Paste here the list of chromosome names that are provided (either the full description line preceded by ">" or only the first word of each of those lines).
+
+b) Create a new working directory for this homework exercise. Using R and R package Biostrings: read the FASTA formatted file into R using function readDNAStringSet.
+Obtain a list of sequence names with R function `names`. Create a subset of these genomic sequences only containing chromosome 4 and save it into a different variable. Write the subsetted genomic sequence only consisting of chromosome 4 to the file system with name "dm6.31_chr4.fasta". 
+Careful: some genome assembly releases label chromosomes starting with letters "chr" (example: chr3, chr4, chrX), but the European Bioinformatics Institute (EBI) uses sequence names without it (so chromosome 4 is called "4").
+c) Use program hisat2-build to create indices for the sequence data you stored in step (b)
+d) Use program hisat2 to align the experimental data found in `/home/bindewald/rnaseq_tutorial/data/dm3_gravity`. Careful: these are 12 files - but because they are reads from paired-end experiment, this corresponds to only 6 sequence searches. Each time, you specify the read file "1" for with opion -1 and read file "2" with option -2. Example read pair files: `g3_01_R1.fastq.gz` and `g3_01_R2.fastq.gz` correspond to high-gravity conditions (g3), repeat 1, files R1 and R2.
+Paste here the directory of the BAM files.
+e) Process the created BAM files as shown in class to create a count matrix. Paste here the code you are using to process the BAML files.
+f) Used R package edgeR to identify differentially expressed genes based on the count data you created in (e). Paste here the list of 5 genes that are most over-expressed and 5 genes that are most under-expressed
+
+
+
+

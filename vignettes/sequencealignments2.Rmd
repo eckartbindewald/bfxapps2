@@ -1,0 +1,73 @@
+---
+title: "Sequence Alignments using Clustal"
+author: "Eckart Bindewald"
+date: "4/14/2020"
+output:
+  powerpoint_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE)
+```
+
+## R Library msa
+
+```{r}
+library(msa)
+```
+
+## Download Data
+
+```{r}
+remote_folder="https://raw.githubusercontent.com/PacktPublishing/R-Bioinformatics-Cookbook/master/datasets/Chapter03"
+fa_file = "hglobin.fa"
+if (!file.exists(fa_file)) {
+  download.file(file.path(remote_folder,fa_file),fa_file)
+}
+stopifnot(file.exists(fa_file))
+```
+
+## Read Alignment
+
+```{r}
+library(Biostrings)
+seqs = readAAStringSet(fa_file)
+```
+
+## Perform Sequence Alignment
+
+```{r}
+alignment = msa(seqs, method="ClustalOmega")
+alignment
+```
+
+## "Pretty Print" of Sequence Alignment
+
+```{r}
+msaPrettyPrint(alignment, output="pdf",file="hglobin_msa.pdf",askForOverwrite = FALSE)
+```
+
+
+## Show The Create Print
+
+```{r}
+knitr::include_graphics("hglobin_msa.pdf")
+```
+
+
+## "msa" as frontend for "Clustal","ClustalOmega" and "Muscle" Algorithms
+
+```{r}
+alignment_muscle = msa(seqs, method="Muscle")
+alignment_muscle
+```
+
+## Summary
+
+* The library "msa" has the R function "msa" for computing multiple sequence alignments
+* Function "msa" provides uniform frontend for different alignment programs
+* Implemented algorithms: Clustal, ClustalOmega, Muscle
+* Function msaPrettePrint for publication-quality output
+
+
+

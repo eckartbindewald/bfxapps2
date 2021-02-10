@@ -1,0 +1,170 @@
+---
+title: "Mock Genome"
+author: "Eckart Bindewald"
+date: "1/20/2020"
+output:
+  word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE,comment=NA)
+library(knitr)
+```
+
+## Model Genome
+
+We will use an in-house R function named genome_mock that generates a character string corresponding a mock genome sequence. Input is a matrix with nucleotide character frequencies for each gene and one additional matrix row with nucleotide frequencies for intergenic regions.
+Note: since this is a rarely used in-house function, there is no need to learn its usage in depth. The point is here that we create simulated data that will help us to study and test other algorithms and programs.
+
+```{r}
+set.seed(2) # ensure that we can obtain same random sequence each time
+library(bfxapps2)
+ freqs <- matrix(1,nrow=5, ncol=4)
+ colnames(freqs) <- c("A","C","G","T")
+ rownames(freqs) <- c("i1","g1","i2","g2","i3")
+ freqs["i1",] <- c(10,10,10,70)
+ freqs["g1",] <- c(12,64,12,12)
+ freqs["i2",] <- c(10,10,10,70)
+ freqs["g2",] <- c(12,12,64,12)
+ freqs["i3",] <- c(10,10,10,70)
+ print(freqs)
+ lengths <- c(10,15,10,30,10)
+ intervalseqs <- genome_mock2(lengths=lengths,freqs=freqs)
+ genome <- paste0(intervalseqs,collapse="")
+ substr(genome,19,25) <- "ATATAAA" # end-of-gene motif
+ substr(genome,59,65) <- "ATATAAA" # end-of-gene motif
+```
+
+The genome length is `r nchar(genome)`
+ 
+The model Genome is:
+   
+`r genome`
+
+## DNA-Seq Reads
+
+DNA-Seq experiments lead to a set of sequence fragment data that correspond to random fragments that are approximately uniformly distributed across the genome. These sequence fragments are called "reads". The approach does not distinguish between genes (transcribed regions) and intergenic genes (non-transcribed regions). 
+
+In practice, there are a variety of biases that we will neglect in our simulated data: the methodology has limitations in regard to DNA regions that contain repeats and low-complexity regions with a large number of repeating nucleotides.
+
+A function `random_fragments` has been implemented that generates random substrings. Here we use this function to generate 20 reads that contain 10 nucleotides each:
+
+```{r}
+ reads <- random_fragments(genome,len=7,n=80)
+```
+
+```{r}
+knitr::kable(reads)
+```
+
+## Matching Reads to the Source Sequence
+
+```{r}
+library(Biostrings)
+gx <- DNAString(genome)
+matches1 <- matchPattern(reads[1],gx)
+matches1
+```
+
+## Matching Reads to the Source Sequence
+
+```{r}
+library(Biostrings)
+gx <- DNAString(genome)
+matches1 <- matchPattern(reads[1],gx)
+matches1
+```
+
+## Visualizing a Read Match
+
+Let us print the genome and the found match of the first read such that a character string has leading and trailing space characters so that it can be printed together with the mock genome sequence. Example: A read with content "ACG" matching at position 3 of mock genome "TTACGTTT" would be easier to print as string "  ACG   " leading to:
+
+```
+  ACG   
+TTACGTTT
+```
+
+```{r}
+lead1 <- paste0(rep(" ",53),collapse="") # this many space characters
+s1 <- paste0(lead1,reads[1])
+cat(s1,"\n",genome,"\n")
+```
+
+## Excercise
+
+Change the hard-coded number "53" so that instead the same number of is obtained from the data structure contained in variable `matches1`
+
+## RNA-Seq
+
+RNA-seq experiments correspond to start with RNA sequences, reverse-transcribing them to DNA strands (called cDNA for complementary DNA) and determining the DNA strand sequences by using an appropriate sequencing technology.
+
+We can generate simulated sequencing results by creating fragments corresponding to the transcribed gene regions of our mock genome.
+
+
+This will help us to compute the coverage of a genomic region:
+
+Definition:
+
+The *Coverage* (or depth) in sequencing experiments is the number of unique reads that include a given nucleotide in the reconstructed sequence
+
+## Appendix
+
+Here were are generating simulated reads that can be used for further analysis and exercises
+
+The originating gene sequences are:
+
+```{r}
+gene1 <- intervalseqs["g1"]
+gene2 <- intervalseqs["g2"]
+kable(c(gene1,gene2))
+```
+
+## Simulated Reads originating from Gene Regions
+
+```{r}
+g1normfrags <- random_fragments(gene1,len=7,n=80)
+g2normfrags <- random_fragments(gene2,len=7,n=160)
+g1treatfrags <- random_fragments(gene1,len=7,n=216)
+g2treatfrags <- random_fragments(gene2,len=7,n=144)
+```
+
+## Simulated Reads Originating from Gene 1 - Normal
+
+```{r}
+kable(g1normfrags)
+```
+
+## Simulated Reads Originating from Gene 2 - Normal
+
+```{r}
+kable(g2normfrags)
+```
+
+## "Case" or "Treatment"
+
+We consider a "case" or "treatment" compared to "normal"
+conditions. This could be tumor tissue versus normal tissue or gene expression in response to therapeutic treatment versus control etc. 
+We are simulating a changed ratio of number of generated reads:
+
+```{r}
+g1treatfrags <- random_fragments(gene1,len=7,n=216)
+g2treatmfrags <- random_fragments(gene2,len=7,n=144)
+```
+
+## Simulated Reads Originating from Gene 1 - Case
+
+```{r}
+kable(g1treatfrags)
+```
+
+## Simulated Reads Originating from Gene 2 - Case
+
+```{r}
+kable(g2treatfrags)
+```
+
+## From Reads to Count Matrices
+
+Let us tabulate, how often a read matches to a gene region. Let there be 2 rows for the 2 genes. And let there be for n students be n * 2 columns (n columns for control and n columns for "case"). In this matrix we enter integer values: for each gene, each students reports two numbers: the number of reads that match to that gene from the normal group and the control group.
+This is called the "count matrix".
+

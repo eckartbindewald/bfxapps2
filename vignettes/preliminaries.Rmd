@@ -1,0 +1,21 @@
+---
+title: "Preliminaries"
+author: "Eckart Bindewald"
+date: "1/15/2020"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Where to find code and data
+
+* Course book: "R Bioinformatics Cookbook" by Dan McLean
+* Github repository: <https://github.com/PacktPublishing/R-Bioinformatics-Cookbook>
+* Datasets: <https://github.com/PacktPublishing/R-Bioinformatics-Cookbook/tree/master/datasets>
+
+## Needed R Packges
+
+* dplyr: "Data pliers": general R package for processing data frames
+* readr: R package for fast and flexible import of data

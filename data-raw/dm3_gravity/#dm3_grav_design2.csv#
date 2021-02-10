@@ -1,0 +1,83 @@
+"","grouping"
+"Last login: Tue Feb 18 18:52:26 on ttys007
+- This warning banner provides privacy and security notices consistent
+  with applicable federal laws, directives, and other federal guidance for
+    accessing this Government system, which includes (1) this computer
+      network, (2) all computers connected to this network, and (3) all devices
+        and storage media attached to this network or to a computer on this
+	  network.
+	  - This system is provided for Government-authorized use only.
+	  - Unauthorized or improper use of this system is prohibited and may result
+	    in disciplinary action and/or civil and criminal penalties.
+	    - Personal use of social media and networking sites on this system is
+	      limited as to not interfere with official work duties and is subject to
+	        monitoring.
+		- By using this system, you understand and consent to the following:
+		   - The Government may monitor, record, and audit your system usage,
+		        including usage of personal devices and email systems for official
+			     duties or to conduct HHS business. Therefore, you have no reasonable
+			          expectation of privacy regarding any communication or data transiting
+				       or stored on this system. At any time, and for any lawful Government
+				            purpose, the government may monitor, intercept, and search and seize
+					         any communication or data transiting or stored on this system.
+						    - Any communication or data transiting or stored on this system may be
+						         disclosed or used for any lawful Government purpose.
+							 (base) FR-N-S087102:~ eckart$ cd
+							 (base) FR-N-S087102:~ eckart$ cd Documents/Hood/
+							 (base) FR-N-S087102:Hood eckart$ ls
+							 accounts_2018
+							 bfxapps2
+							 biomedweb
+							 biomedweb 2.zip
+							 biomedweb 3.zip
+							 biomedweb.orig
+							 biomedweb.zip
+							 biomedweb_grades
+							 biomedweb_repos
+							 biovisualization
+							 biovisualization_class2019
+							 bookstore
+							 dynoweb_c9.tar
+							 machinelearning
+							 newsinterview
+							 project_rees
+							 student_conversations
+							 survey
+							 syllabus
+							 trainings
+							 (base) FR-N-S087102:Hood eckart$ cd
+							 (base) FR-N-S087102:~ eckart$ cd rstudio
+							 (base) FR-N-S087102:rstudio eckart$ cd bfxapps2/
+							 (base) FR-N-S087102:bfxapps2 eckart$ ls
+							 DESCRIPTION		      bfxapps2.Rproj	rnaseq_deseq2.R
+							 DESCRIPTION~		      data			tests
+							 NAMESPACE		      data-raw			vignettes
+							 R			      				man
+							 (base) FR-N-S087102:bfxapps2 eckart$ cd data-raw/
+							 (base) FR-N-S087102:data-raw eckart$ ls
+							 mockgenome
+							 (base) FR-N-S087102:data-raw eckart$ mkdir dm3_gravity
+							 (base) FR-N-S087102:data-raw eckart$ cd dm3_gravity/
+							 (base) FR-N-S087102:dm3_gravity eckart$ scp bindewald@144.175.88.21:/home/bindewald/rnaseq_tutorial/run/dm3_grav_design.csv .
+							 bindewald@144.175.88.21's password:
+							 (base) FR-N-S087102:dm3_gravity eckart$ scp bindewald@144.175.88.21:/home/bindewald/rnaseq_tutorial/run/dm3_grav_design.csv .
+							 bindewald@144.175.88.21's password:
+							 Permission denied, please try again.
+							 bindewald@144.175.88.21's password:
+							 dm3_grav_design.csv    100%   68    14.0KB/s   00:00
+							 (base) FR-N-S087102:dm3_gravity eckart$ scp bindewald@144.175.88.21:/home/bindewald/rnaseq_tutorial/run/dm3_grav_counts.csv .
+							 bindewald@144.175.88.21's password:
+							 Permission denied, please try again.
+							 bindewald@144.175.88.21's password:
+							 dm3_grav_counts.csv    100% 3284   527.9KB/s   00:00
+							 (base) FR-N-S087102:dm3_gravity eckart$ ls -ltr
+							 total 16
+							 -rw-r--r--  1 eckart  staff    68 Feb 18 18:54 dm3_grav_design.csv
+							 -rw-r--r--  1 eckart  staff  3284 Feb 18 18:55 dm3_grav_counts.csv
+							 (base) FR-N-S087102:dm3_gravity eckart$ more dm3_grav_counts.csv
+							 "","g1.01.hisat2.bam","G1"
+"2","G1"
+"3","G1"
+"4","G3"
+"5","G3"
+"6","G3"

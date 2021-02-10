@@ -1,0 +1,124 @@
+---
+title: "Proteomics"
+author: "Eckart Bindewald"
+date: "4/21/2020"
+output:
+  powerpoint_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE)
+```
+
+## Proteomics
+
+```{r}
+library(mzR)
+library(MSnbase)
+```
+
+## Load Data
+
+```{r}
+remote_folder="https://raw.githubusercontent.com/PacktPublishing/R-Bioinformatics-Cookbook/master/datasets/Chapter06"
+ms_file1 = "threonine_i2_e35_pH_tree.mzXML"
+# openMSfile(mzxml_file"
+if (!file.exists(ms_file1)) {
+  download.file(file.path(remote_folder,ms_file1))
+}
+stopifnot(file.exists(ms_file1))
+```
+
+## Read in Data
+
+```{r}
+ms1 <- openMSfile(ms_file1)
+runInfo(ms1)
+```
+
+
+## Plot Spectra
+
+```{r}
+msn_exp <- MSnbase::readMSData(ms_file1)
+MSnbase::plot(msn_exp,full=TRUE)
+```
+
+## Plot Single Spectrum
+
+```{r}
+MSnbase::plot(msn_exp[[5]],full=TRUE)
+```
+
+## Viewing Proteomics Data in a Browser
+
+```{r}
+library(MSnID)
+library(EnsDb.Hsapiens.v86)
+library(rtracklayer)
+```
+
+## Create Search File Object:
+
+```{r}
+ms_file2 = "HeLa_180123_m43_r2_CAM.mzid.gz"
+if (!file.exists(ms_file2)) {
+  download.file(file.path(remote_folder,ms_file2),ms_file2)
+}
+stopifnot(file.exists(ms_file2))
+
+msnid <- MSnID()
+msnid <- read_mzIDs(msnid,ms_file2)
+```
+
+## Extract Rows
+
+```{r}
+real_hits <- msnid@psms[!msnid@psms$isDecoy,]
+```
+
+## Obtain information about each hit
+
+```{r}
+required_info = real_hits[,c("spectrumID","pepSeq","accession","start","end")]
+required_info
+```
+
+## Extract UniProt IDs
+
+```{r}
+uniprot_ids <- unlist(lapply(strsplit(required_info$accession,"\\|"),function(x){x[2]}))
+uniprot_ids <- uniprot_ids[!is.na(uniprot_ids)]
+```
+
+## Create Database Connection
+
+```{r}
+edb <- EnsDb.Hsapiens.v86
+genes_for_prots <- genes(edb,filter=UniprotFilter(uniprot_ids),
+                         columns=c("gene_name","gene_seq_start","gene_seq_end","seq_name"))
+```
+
+## Setup Genome Browser Track
+
+```{r}
+ is_short <- !is.na(as.numeric(as.vector(seqnames(genes_for_prots))))
+ genes_for_prots <- genes_for_prots[is_short]
+track <- GRangesForUCSCGenome("hg38",
+                              paste0("chr",as.vector(seqnames(genes_for_prots))),
+                              ranges(genes_for_prots),
+                              strand(genes_for_prots),
+                              genes_for_prots$gene_name,
+                              genes_for_prots$uniprot_id)
+```
+
+
+## Set Up Browser Session and View
+
+```{r}
+session <- browserSession("UCSC")
+track(session,"my_peptides") <- track
+first_peptide <- track[1]
+view <- browserView(session, first_peptide*(-5),pack="my_peptides")
+```
+

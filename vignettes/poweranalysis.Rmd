@@ -1,0 +1,20 @@
+---
+title: "Power Analysis"
+author: "Eckart Bindewald"
+date: "1/26/2020"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message=FALSE)
+```
+
+
+```{r}
+if (!require("devtools")) {
+  install.packages("devtools")
+}
+if (!require("powsimR")) {
+  devtools::install_github("bvieth/powsimR")
+}
+```

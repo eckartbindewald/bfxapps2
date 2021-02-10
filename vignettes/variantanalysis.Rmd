@@ -1,0 +1,112 @@
+---
+title: "Finding Genetic Variants"
+author: "Eckart Bindewald"
+date: "2/17/2020"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,message=FALSE,warning=FALSE)
+```
+
+## Preliminaries
+
+```{r}
+library(GenomicRanges)
+library(gmapR)
+library(rtracklayer)
+library(VariantAnnotation)
+library(VariantTools)
+```
+
+
+## Download Data
+
+```{r}
+bam_folder="https://raw.githubusercontent.com/PacktPublishing/R-Bioinformatics-Cookbook/master/datasets/Chapter02"
+bamfile="hg17_snps.bam"
+if (!file.exists(bamfile)) {
+  download.file(file.path(bam_folder,bamfile),bamfile)
+}
+
+```
+
+## Plumbing: Indexing BAM File
+
+```{r}
+# command = paste("samtools index",bamfile) 
+command = paste("/Users/eckart/programs/anaconda/bin/samtools index",bamfile) # hg17_snps.bam
+system(command,intern=TRUE)
+```
+
+## Downloading Sequence Information
+
+```{r}
+
+fasta_file <- "/Users/eckart/rstudio/bfxapps2/vignettes/chr17.83k.fa"
+if (!file.exists(fasta_file)) {
+  download.file(file.path(bam_folder,fasta_file), fasta_file)
+}
+fa <- rtracklayer::FastaFile(fasta_file)
+genome <- gmapR::GmapGenome(fa, create=TRUE)
+```
+
+## Specify Variant Parameters
+
+```{r}
+qual_params <- TallyVariantsParam(genome = genome, minimum_mapq = 20)
+```
+
+## Specify Variant Parameters (II)
+
+```{r}
+p.lower = 0.05
+var_params <- VariantCallingFilters(read.count = 19,p.lower)
+```
+
+
+## "Calling" Variants
+
+```{r}
+called_variants <- callVariants(bamfile, qual_params,
+calling.filters = var_params
+)
+head(called_variants)
+```
+
+## Superpose with Annotations
+
+```{r}
+get_annotated_regions_from_gff <- function(file_name) {
+gff <- rtracklayer::import.gff(file_name)
+as(gff, "GRanges")
+}
+get_annotated_regions_from_bed <- function(file_name){
+bed <- rtracklayer::import.bed(file_name)
+as(bed, "GRanges")
+}
+genes <- get_annotated_regions_from_gff(file.path( bam_folder,
+"chr17.83k.gff3"))
+```
+
+## Find Overlaps of Genes with Variants
+
+```{r}
+overlaps <- GenomicRanges::findOverlaps(called_variants, genes)
+overlaps
+```
+
+
+## List Genes That Have Variants
+
+```{r}
+genes[subjectHits(overlaps)]
+```
+
+## Save as VCF File
+
+```{r}
+VariantAnnotation::sampleNames(called_variants) <- "sample_name"
+vcf <- VariantAnnotation::asVCF(called_variants)
+VariantAnnotation::writeVcf(vcf, "hg17.vcf")
+```

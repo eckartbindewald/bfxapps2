@@ -1,0 +1,94 @@
+---
+title: "Finding Peaks"
+author: "Eckart Bindewald"
+date: "1/26/2020"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,message=FALSE, warning=FALSE)
+```
+
+## How can one find "new genes"?
+
+```{r echo=FALSE}
+knitr::include_graphics("rnaseq/Screen Shot 2020-01-28 at 4.29.34 PM.png")
+```
+
+* Let's look at some data!
+* Data and code from R Bioinformatics Cookbook by Dan McLean
+
+## Preliminaries
+
+```{r}
+if (!require("Rsamtools")) {
+  BiocManager::install("Rsamtools")
+}
+library(Rsamtools)
+if (!require("bumphunter)")) {
+  BiocManager::install("bumphunter")
+}
+library(bumphunter)
+```
+
+## Downloading Data
+
+```{r}
+# original: file.path(getwd(), "datasets", "ch1", "windows.bam"),
+urldir <- "https://raw.githubusercontent.com/PacktPublishing/R-Bioinformatics-Cookbook/master/datasets/Chapter01"
+bamname <- "windows.bam"
+bainame <- "windows.bam.bai"
+if (!file.exists(bamname)) {
+  download.file(file.path(urldir,bamname),bamname)
+}
+if (!file.exists(bainame)) {
+  download.file(file.path(urldir,bainame),bainame)
+}
+
+```
+
+## Creating "Pileups"
+
+```{r}
+library(ggplot2)
+library(dplyr)
+pileup_df <- Rsamtools::pileup(bamname)
+knitr::kable(head(pileup_df))
+```
+
+
+## Plotting Coverage Plots
+
+```{r}
+pileup_df %>% ggplot(aes(x=pos,y=count)) + geom_line()
+```
+
+## Finding Clusters
+
+The function `clusterMaker` assigns an integer value to each position:
+
+```{r}
+clusters <- bumphunter::clusterMaker(pileup_df$seqnames,pileup_df$pos, maxGap = 100)
+clusters
+```
+
+## Exercise
+
+The "clusters" is a long integer vector
+Convert it using Rle and table to something more intepretable
+How many clusters are there? What integer values are assigned to them?
+How long are the regions?
+
+
+## Find Regions with Cutoffs
+
+```{r}
+bumphunter::regionFinder(pileup_df$count, pileup_df$seqnames,
+pileup_df$pos, clusters, cutoff=1)
+```
+
+## Exercise:
+
+How many regions are there?
+Plot the regions together with the original coverage plot
+

@@ -1,0 +1,129 @@
+---
+title: "Genome-Wide Association Studies (GWAS)"
+author: "Eckart Bindewald"
+date: "3/24/2020"
+output:
+  powerpoint_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE)
+```
+
+## Preliminaries
+
+```{r}
+if (!require(rrBLUP)) {
+  install.packages("rrBLUP")
+}
+if (!require(VariantAnnotation)) {
+  BiocManager::install("VariantAnnotation")
+}
+```
+
+## Loading Libraries
+
+```{r}
+library(rrBLUP)
+library(VariantAnnotation)
+
+remote_folder="https://raw.githubusercontent.com/PacktPublishing/R-Bioinformatics-Cookbook/master/datasets/Chapter02"
+vcf_file = "small_sample.vcf"
+if (!file.exists(vcf_file)) {
+  download.file(file.path(remote_folder,vcf_file),vcf_file)
+}
+stopifnot(file.exists(vcf_file))
+vcf <- readVcf(vcf_file,"hg19")
+vcf
+```
+
+## Extract Genotype, Sample and Marker Position
+
+```{r}
+gts <- geno(vcf)$GT
+gts
+```
+
+## Extracting Needed Information
+
+```{r}
+samples <- samples(header(vcf))
+markers <- rownames(gts)
+chrom <- as.character(seqnames(rowRanges(vcf)))
+pos <- as.numeric(start(rowRanges(vcf)))
+samples
+markers
+chrom
+pos
+```
+
+## Different Encodings - A Workaround
+
+* In VCF file format, we encode mutations as "0/0", "0/1", "1/0", "1/1"
+* Corresponds to AA (homozygous), Aa and aA (heterozygous) and "aa"
+* GWAS function from rrBLUP package needs different encoding (numbers 1,0,0,-1 respectively)
+* We need as workaround convert those two encodings
+
+## Create Custom Function
+
+```{r}
+convert <- function(v){
+ v <- gsub("0/0",1,v)
+ v <- gsub("0/1", 0, v)
+ v <- gsub("1/0", 0, v)
+ v <- gsub("1/1", -1, v)
+ return(v)
+}
+```
+
+## Convert Data to Matrix
+
+```{r}
+gt_char <- apply(gts, convert, MARGIN=2)
+genotype_matrix <- matrix(as.numeric(gt_char), nrow(gt_char))
+colnames(genotype_matrix) <- samples
+genotype_matrix
+```
+
+## Build Dataframe
+
+```{r}
+variant_info <- data.frame(marker = markers,
+                           chrom = chrom,
+                           pos = pos)
+variant_info
+```
+
+
+## Build Combined Variant/Genotype Dataframe
+
+```{r}
+genotypes <- cbind(variant_info, as.data.frame(genotype_matrix))
+genotypes
+```
+
+## Build Phenotype Dataframe
+
+```{r}
+phenotypes <- data.frame(line=samples, score=rnorm(length(samples)))
+phenotypes
+```
+
+## Run GWAS
+
+```{r}
+gresult=GWAS(phenotypes, genotypes, plot=FALSE)
+gresult
+```
+
+## Practical Exercise
+
+```{r}
+if (!require(mlmm.gwas)) {
+  install.packages("mlmm.gwas")
+}
+library(mlmm.gwas)
+data("mlmm.gwas.AD")
+```
+
+

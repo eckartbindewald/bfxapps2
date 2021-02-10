@@ -1,0 +1,74 @@
+---
+title: "Whole-Genome Alignments"
+author: "Eckart Bindewald"
+date: "4/14/2020"
+output:
+  powerpoint_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE)
+```
+
+## R Library Decipher
+
+```{r}
+if (!require(DECIPHER)) {
+  BiocManager::install("DECIPHER")
+}
+library(DECIPHER)
+```
+
+## Download Data
+
+```{r}
+remote_folder="https://raw.githubusercontent.com/PacktPublishing/R-Bioinformatics-Cookbook/master/datasets/Chapter03"
+fa_file = "plastid_genomes.fa"
+if (!file.exists(fa_file)) {
+  download.file(file.path(remote_folder,fa_file),fa_file)
+}
+stopifnot(file.exists(fa_file))
+```
+
+## Reading DNA Sequences
+
+```{r}
+library(Biostrings)
+seqs <- readDNAStringSet(fa_file)
+seqs
+```
+
+## Prepare Local "Indices"
+
+```{r}
+sequence_names <- names(seqs)
+Seqs2DB(seqs, "XStringSet", "long_db", sequence_names)
+```
+
+## Find Synteny
+
+```{r}
+synteny = FindSynteny("long_db")
+pairs(synteny)
+```
+
+
+## Plot Syntenic Blocks
+
+```{r}
+plot(synteny)
+```
+
+## Align Syntenic Blocks
+
+```{r}
+alignment = AlignSynteny(synteny, "long_db")
+```
+
+## Save Pairwise Alignments
+
+```{r}
+blocks = unlist(alignment[[1]])
+writeXStringSet(blocks, "genome_blocks_out.fa")
+```
+
