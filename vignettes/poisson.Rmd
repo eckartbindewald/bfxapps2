@@ -129,8 +129,8 @@ ggplot(data=prussian,aes(x=y)) + geom_histogram(aes(y = stat(count / sum(count))
 
 ## Exercise
 
-* You find out that your favourite cheese cake has on average 3 raisins per slice
-* Assume that distributing raisons on a cake are random independent events
+* You find out that your favorite cheese cake has on average 3 raisins per slice
+* Assume that distributing raisins on a cake are random independent events
 * Use R function `dpois` to compute the probability of having a slice of cake with exactly one raisin
 * Use R function `dpois` to compute the probability of having a slice of cake with zero raisins
 * Add the two last values to compute the probability of having a slice of cake with 0 or 1 raisins. Use R function ppois to compute the same value.
@@ -144,7 +144,7 @@ a) Generate a new data frame called prussian2 that contains for each corp 10 row
 b) Plot a histogram of the number of events occurring in 2-year intervals
 c) Compute an updated value of lambda
 d) Using function dpois, compute a vector of Poisson model probabilities for k=0 to 10
-e) Add points of modelled probabilities to the histogram plotted in b)
+e) Add points of modeled probabilities to the histogram plotted in b)
 f) Code your alternative R implementation of the function dpois that takes a vector of k values and a value of lambda as input and returns probabilities according to a Poisson distribution
 
 ## Nicer Output with R package broom
