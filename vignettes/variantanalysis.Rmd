@@ -23,7 +23,7 @@ library(VariantTools)
 ## Download Data
 
 ```{r}
-bam_folder="https://raw.githubusercontent.com/PacktPublishing/R-Bioinformatics-Cookbook/master/datasets/Chapter02"
+bam_folder="https://raw.githubusercontent.com/PacktPublishing/R-Bioinformatics-Cookbook/master/datasets/ch2"
 bamfile="hg17_snps.bam"
 if (!file.exists(bamfile)) {
   download.file(file.path(bam_folder,bamfile),bamfile)

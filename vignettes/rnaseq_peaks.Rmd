@@ -35,7 +35,7 @@ library(bumphunter)
 
 ```{r}
 # original: file.path(getwd(), "datasets", "ch1", "windows.bam"),
-urldir <- "https://raw.githubusercontent.com/PacktPublishing/R-Bioinformatics-Cookbook/master/datasets/Chapter01"
+urldir <- "https://raw.githubusercontent.com/PacktPublishing/R-Bioinformatics-Cookbook/master/datasets/ch1"
 bamname <- "windows.bam"
 bainame <- "windows.bam.bai"
 if (!file.exists(bamname)) {
