@@ -2,7 +2,8 @@
 title: "Finding Peaks"
 author: "Eckart Bindewald"
 date: "1/26/2020"
-output: ioslides_presentation
+output:
+  ioslides_presentation
 ---
 
 ```{r setup, include=FALSE}
@@ -69,7 +70,14 @@ The function `clusterMaker` assigns an integer value to each position:
 
 ```{r}
 clusters <- bumphunter::clusterMaker(pileup_df$seqnames,pileup_df$pos, maxGap = 100)
-clusters
+knitr::kable(table(clusters))
+```
+
+## Plotting Coverage Plots
+
+```{r}
+pileup_df$clusters <- as.factor(clusters)
+pileup_df %>% ggplot(aes(x=pos,y=count)) + geom_line(aes(colour=clusters))
 ```
 
 ## Exercise
@@ -92,3 +100,49 @@ pileup_df$pos, clusters, cutoff=1)
 How many regions are there?
 Plot the regions together with the original coverage plot
 
+## Visualizing RNA-Seq Results
+
+```{r}
+library(DESeq2)
+library(magrittr)
+library(ggplot2)
+ddsname <- "modencode_dds.RDS"
+if (!file.exists(ddsname)) {
+  download.file(file.path(urldir,ddsname),ddsname)
+}
+dds <- readRDS(ddsname)
+dds
+```
+```{r}
+result_df <- results(dds, contrast = c("stage", "L2Larvae","L1Larvae"), tidy=TRUE) 
+stopifnot(is.data.frame(result_df))
+```
+
+
+
+## Expression Result Table
+
+```{r}
+knitr::kable(head(result_df))
+```
+
+## Filtering Out Non-Significant Rows
+
+Require adjusted P value < 0.05
+
+```{r}
+result_df <- result_df %>% mutate(is_significant=(padj < 0.05))
+# modern notation: result_df <- result_df %>% filter(padf < 0.05)
+```
+
+## Plotting fold change versus mnea of base case (MA-Plot)
+
+```{r}
+ggplot(result_df, aes(x=baseMean, y=log2FoldChange)) + geom_point(aes(colour=is_significant))
+```
+
+## Volcanoe Plot
+
+```{r}
+ggplot(result_df, aes(x=log2FoldChange, y=(-1*log10(pvalue)))) + geom_point(aes(colour=is_significant))
+```
