@@ -1,3 +1,5 @@
+*.RDS
+*.rds
 *.bam
 *.bai
 *.txt
