@@ -141,7 +141,7 @@ result_df <- result_df %>% mutate(is_significant=(padj < 0.05))
 ggplot(result_df, aes(x=baseMean, y=log2FoldChange)) + geom_point(aes(colour=is_significant))
 ```
 
-## Volcanoe Plot
+## Volcano Plot
 
 ```{r}
 ggplot(result_df, aes(x=log2FoldChange, y=(-1*log10(pvalue)))) + geom_point(aes(colour=is_significant))
