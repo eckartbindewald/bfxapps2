@@ -52,7 +52,6 @@ fa <- rtracklayer::FastaFile(fasta_file)
 genome <- gmapR::GmapGenome(file.path("/Users/eckart/rstudio/bfxapps2/vignettes",fa), create=TRUE)
 ```
 
-## Specify Variant Parameters
 
 ```{r}
 qual_params <- TallyVariantsParam(genome = genome, minimum_mapq = 20)
