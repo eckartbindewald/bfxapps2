@@ -17,6 +17,7 @@ library(gmapR)
 library(rtracklayer)
 library(VariantAnnotation)
 library(VariantTools)
+setwd("/Users/eckart/rstudio/bfxapps2/vignettes")
 ```
 
 
@@ -36,19 +37,19 @@ if (!file.exists(bamfile)) {
 ```{r}
 # command = paste("samtools index",bamfile) 
 command = paste("/Users/eckart/programs/anaconda/bin/samtools index",bamfile) # hg17_snps.bam
-system(command,intern=TRUE)
+# system(command,intern=TRUE)
 ```
 
 ## Downloading Sequence Information
 
 ```{r}
 
-fasta_file <- "/Users/eckart/rstudio/bfxapps2/vignettes/chr17.83k.fa"
+fasta_file <- "chr17.83k.fa" # /Users/eckart/rstudio/bfxapps2/vignettes/chr17.83k.fa"
 if (!file.exists(fasta_file)) {
   download.file(file.path(bam_folder,fasta_file), fasta_file)
 }
 fa <- rtracklayer::FastaFile(fasta_file)
-genome <- gmapR::GmapGenome(fa, create=TRUE)
+genome <- gmapR::GmapGenome(file.path("/Users/eckart/rstudio/bfxapps2/vignettes",fa), create=TRUE)
 ```
 
 ## Specify Variant Parameters
