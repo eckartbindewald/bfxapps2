@@ -1,0 +1,294 @@
+---
+title: "Variant Analysis with R package seqCAT"
+package: "`r BiocStyle::pkg_ver('seqCAT')`"
+output:
+    powerpoint_presentation
+---
+
+```{r Options, echo = FALSE}
+# taken out from header: bibliography: bibliography.bib
+knitr::opts_chunk$set(fig.align = "center", message = FALSE)
+```
+
+## Introduction
+
+* R package seqCAT is utilized for processing *Single Nucleotide Variant* (SNV) data
+* Can be used for different types of high-througput sequencing (RNA-seq, whole genome (DNA) sequencing)
+* Slides based on vignette of seqCAT R package
+
+
+## Potential Uses
+
+* Determine which variants have likely high influence on phenotype
+* Determine which genes are affected by variants
+* Determine similarity scores between samples
+* Determine authenticity of a sample
+
+## Approach
+
+1. Variants (SNVs) are read from file in VCF format
+2. Create SNV profiles for each sample
+3. Comparison of SNV profiles
+4. Use profile comparison for authentication, characterisation and evaluation
+
+## Installation
+
+The latest stable release of this package can be found on
+[Bioconductor][bioc-home] and installed with:
+
+```{r Installation}
+# BiocManager::install("seqCAT")
+
+library("seqCAT") # Load the package
+```
+
+
+## Creation of SNV profiles
+
+The first step of the workflow is to create the SNV profile of each sample,
+which can then be compared to each other. The creation of a SNV profile
+includes filtering of low-confidence variants, removal of variants below a
+sequencing depth threshold (`10` by default), de-duplication of variants and an
+optional removal of mitochondrial variants (`TRUE` by default). For annotated
+VCF files, only records with the highest SNV impact (*i.e.* [impact][] on
+protein function) for each variant is kept, as they are most likely to affect
+the biology of the cells.
+
+## Example Data
+
+* R seqCat contains example data with filename `example.vcf.gz`
+* Contains SNV data for subset of human chromosome 12
+* Three different colorectal cancer cell lines: *HCT116*, *HKE3*, *RKO*
+
+## Reading VCF and Creating an SNV Profile
+
+```{r Create an SNV profile}
+# List the example VCF file
+vcf <- system.file("extdata", "example.vcf.gz", package = "seqCAT")
+
+# Create two SNV profiles
+hct116 <- create_profile(vcf, "HCT116")
+head(hct116)
+
+```
+
+## SNV Profiles
+
+* An SNV "profile" is a concept from this R package
+* Contains information about all varians plus extra annotations (such as genes)
+* `chr` and `pos`: Chromosome and position of SNV
+* REF: nucleotide in reference sequence
+* ALT: nucleotide in sample sequence
+* A1: nucleotide in allele 1 
+* A2: nucleotide in allele 2
+* DP: sequencing depth at variant position
+* AD1: number of reads corresponding to allele 1
+* AD2: number of reads corresponding to alelele 2
+* rsID: ID of SNV if known in reference database
+
+## Variant filtration
+
+* Function `create_profile` has useful defaults
+* Can be used to filter variants
+* `min_depth`: require minimum sequencing depth (=minumum number of reads aligned at that position)
+* `filter_gd`: filter out duplicate SNVs at gene level (default is "true")
+* `filter_mt`: Filter out variants located on mitochondrial DNA (default = true)
+* `filter_ns`: Filter out variants located on non-standard chromosomes (default = true)
+
+```{r Create a filtered SNV profile}
+rko <- create_profile(vcf, "RKO", min_depth = 15, filter_gd = FALSE)
+```
+
+
+## Create multiple profiles
+
+* Function `create_profiles` can create multiple profiles for VCF formatted files in a directory
+
+```{r Create multiple profiles, messages = FALSE}
+vcf_dir <- system.file("extdata", package = "seqCAT") # Directory with VCF files
+# Create profiles for each VCF with "sample1" in its name
+profiles <- create_profiles(vcf_dir, pattern = "sample1")
+```
+
+## Comparing full profiles
+
+* SNV profiles for two samples can be compared with `compare_profiles`.
+* mode: Determine which SNVs to keep in comparison
+* mode="intersection" (default): keep only SNVs that are identical between profiles
+* mode="union" : keep all SNVs from both profiles
+
+```{r Compare profiles}
+hct116_rko <- compare_profiles(hct116, rko)
+head(hct116_rko)
+```
+
+## Comparing Profiles with mode "union"
+
+```{r Compare profiles (union)}
+hct116_rko_union <- compare_profiles(hct116, rko, mode = "union")
+head(hct116_rko_union)
+```
+
+## Similarity and global statistics
+
+* Comparison: what fraction of position-matched SNVs for two samples have same nucleotides (=genotype)?
+* Similarity score: fraction of identical variants for set of position-matched variants
+
+## Similarity Score Formula
+
+$$Similarity = 100 \times \frac{s + a}{n + a + b}$$
+* a,b: Empirical parameters set to 1 and 5. Leads to similarities > 90 for equivalent cells
+* `s` is the number of matching genotypes
+* `n` is the total number of overlapping SNVs, `a` and `b` being the parameters used to weigh the
+
+```{r Calculate similarities}
+similarity <- calculate_similarity(hct116_rko)
+similarity
+```
+
+
+## Evaluation of SNV impacts
+
+* An SNV can have many effects on an organism
+* Premature truncation of protein: high impact
+* change in protein sequence: moderate impact
+* change in untranslated RNA sequence: low impact
+* no change of gene products (SNV is in intergenic region): marginal "modifier" impact
+
+## Plotting impact of SNVs
+
+* Analysis can be performed by the `plot_impacts` function:
+
+```{r Impact distributions}
+impacts <- plot_impacts(hct116_rko)
+impacts
+```
+
+## Analyzing Subsets of Variants
+
+```{r Subset impacts}
+hct116_rko_hm <- hct116_rko[hct116_rko$impact == "HIGH" |
+                            hct116_rko$impact == "MODERATE", ]
+nrow(hct116_rko_hm)
+```
+
+## Evaluation of specific chromosomes, regions, genes and transcripts
+
+One can create subsets of the profile comparions by filtering by chromosome and position:
+
+```{r Subset chromosome or region}
+hct116_rko_region <- hct116_rko[hct116_rko$chr == 12 &
+                                hct116_rko$pos >= 25000000 &
+                                hct116_rko$pos <= 30000000, ]
+head(hct116_rko_region)
+```
+
+## Focusing on Individual Genes
+
+One can filter SNV comparisons by gene annotation like so:
+
+```{r Subset gene or transcript}
+hct116_rko_eps8_t <- hct116_rko[hct116_rko$ENSTID == "ENST00000281172", ]
+hct116_rko_vamp1 <- hct116_rko[hct116_rko$ENSGID == "ENSG00000139190", ]
+hct116_rko_ldhb <- hct116_rko[hct116_rko$gene == "LDHB", ]
+head(hct116_rko_ldhb)
+```
+
+
+## Comparison With Known Variants
+
+* Function `list_variants` function looks for the genotypes of each specified variant
+* Needs data frame describing known variants
+
+```{r Create known variants list}
+known_variants <- data.frame(chr  = c(12, 12, 12, 12),
+                             pos  = c(25358650, 21788465, 21797029, 25398281),
+                             gene = c("LYRM5", "LDHB", "LDHB", "KRAS"),
+                             stringsAsFactors = FALSE)
+known_variants
+```
+
+## Listing Known Variants
+
+```{r List variants}
+variant_list <- list_variants(list(hct116, rko), known_variants)
+variant_list
+```
+
+
+## Plotting Variants
+
+* plot_variant_list can graphically plot variants
+* slightly modified version of the output from the `list_variants`
+function: it may only contain the genotype columns. We thus need to create row
+names to identify the variants, like this:
+
+```{r, Plot variant list}
+# Set row names to "chr: pos (gene)"
+row.names(variant_list) <- paste0(variant_list$chr, ":", variant_list$pos,
+                                  " (", variant_list$gene, ")")
+to_remove <- c("chr", "pos", "gene") # Remove "chr", "pos" and "gene" columns
+variant_list <- variant_list[, !names(variant_list) %in% to_remove]
+genotype_grid <- plot_variant_list(variant_list) # Plot the genotypes in a grid
+genotype_grid
+```
+
+
+## Purpose Of Plotting Variats
+
+* KRAS<sup>G13D</sup> mutation is indeed present in the HCT116, but not in RKO.
+* RKO has a homozygous `G/G` genotype for one of the LDHB variants
+* HCT116 is heterozygous (`T/G`) for the same.
+* (Please note that this data was aligned and analysed using the GRCh37 / hg19 assembly)
+
+ 
+## Performing multiple profile comparisons
+
+* We can perform analysis of muliple samples using function `compare_many`
+
+```{r Many-to-many comparisons}
+hke3 <- create_profile(vcf, "HKE3")
+profiles <- list(hct116, hke3, rko) # Create list of SNV profiles
+# Perform many-to-many comparisons
+many <- compare_many(profiles)
+many[[1]]
+```
+
+## Outout of `compare_many`
+
+* similarities are stored in the first element of the results (`many[[1]]`)
+* data for each comparison is stored in the second (`many[[2]]`). 
+second element is itself also a list, whose indices correspond to the row names
+of the similarity object.
+
+```{r HKE3 self-comparisons}
+hke3_hke3 <- many[[2]][[4]]
+head(hke3_hke3)
+```
+
+
+
+## Visualising multiple comparisons
+
+* headmap is effective for visualising multiple profile comparisons
+* We can use the summary statistics listed in the similarity
+object from above as input to the function `plot_heatmap`:
+
+```{r Plot heatmap, out.width = "60 %"}
+heatmap <- plot_heatmap(many[[1]])
+heatmap
+```
+
+* blue colour gradient for the similarity score of the three cell
+lines, which are clustered according to their similarity (using `cluster =
+TRUE`, as default). 
+* HCT116 and HKE3 are, indeed, very similar to each other, while RKO differs from them both.
+* can be created for an arbitrary number of samples
+* can be used to evaluate the quality of the datasets (*e.g.* to see which comparisons
+have very few overlaps), find similarity clusters and potential unexpected
+outliers. If a sample stands out in a heatmap such as this, that is grounds for
+further investigation
+
+```{r Remove temporary files, echo = FALSE, results = "hide"}
+file.remove("hct116.profile.txt")
+```
