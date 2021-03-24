@@ -27,7 +27,7 @@ if (!require(VariantAnnotation)) {
 library(rrBLUP)
 library(VariantAnnotation)
 
-remote_folder="https://raw.githubusercontent.com/PacktPublishing/R-Bioinformatics-Cookbook/master/datasets/Chapter02"
+remote_folder="https://raw.githubusercontent.com/PacktPublishing/R-Bioinformatics-Cookbook/master/datasets/ch2"
 vcf_file = "small_sample.vcf"
 if (!file.exists(vcf_file)) {
   download.file(file.path(remote_folder,vcf_file),vcf_file)
