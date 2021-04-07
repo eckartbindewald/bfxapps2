@@ -1,0 +1,86 @@
+---
+title: "Bio3D R pagage"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## bio3d R package
+
+```{r}
+# install.packages("bio3d)
+library(bio3d)
+```
+
+
+```{r}
+pdbfile = system.file("examples/1hel.pdb", package="bio3d") 
+pdb <- read.pdb( pdbfile)
+x = read.pdb("4dfr.pdb")
+names(x)
+```
+
+## Data structure "atom"
+
+```{r}
+x[["atom"]]
+```
+
+
+## Data structure "xyz"
+
+```{r}
+x[["xyz"]]
+```
+
+## Selecting Atoms with "atom.select"
+
+```{r}
+# Select protein atoms of chain A
+chaina <- atom.select(pdb, "protein", chain="A")
+```
+
+## Selecting Atoms 
+
+```{r}
+# Select all C-alpha atoms with residues numbers between 43 and 54
+sele <- atom.select(pdb, "calpha", resno=43:54, verbose=TRUE)
+# Access the PDB data with the selection indices
+print( pdb$atom[ sele$atom, "resid" ] )
+```
+
+## Create PDB Data Structure Based on Selection
+
+```{r}
+# Trim PDB to selection
+ca.pdb <- trim.pdb(pdb, sele)
+ca.pdb
+```
+
+## Aligning PDB Structures
+
+```{r}
+root = system.file(package="bfxapps2")
+pdbfile = file.path(root, "extdata","pdb", "1xwc.pdb")
+pdbfile2 = file.path(root, "extdata","pdb", "3trx.pdb")
+stopifnot(file.exists(pdbfile))
+stopifnot(file.exists(pdbfile2))
+a <- read.pdb(pdbfile)
+b <- read.pdb(pdbfile2)
+stopifnot(file.exists(pdbfile))
+# download.file(pdbfile, "1xwc.pdb")
+```
+
+## Aligning PDB Structures
+
+```{r}
+# aln <- pdbaln(list("1xwc"=a, "3trx"=b))
+# aln
+```
+
+
+
+
+
