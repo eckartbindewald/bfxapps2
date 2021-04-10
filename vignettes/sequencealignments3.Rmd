@@ -3,7 +3,8 @@ title: "Whole-Genome Alignments"
 author: "Eckart Bindewald"
 date: "4/14/2020"
 output:
-  powerpoint_presentation
+  ioslides_presentation: default
+  powerpoint_presentation: default
 ---
 
 ```{r setup, include=FALSE}
@@ -22,7 +23,8 @@ library(DECIPHER)
 ## Download Data
 
 ```{r}
-remote_folder="https://raw.githubusercontent.com/PacktPublishing/R-Bioinformatics-Cookbook/master/datasets/Chapter03"
+remote_folder="https://raw.githubusercontent.com/PacktPublishing/R-Bioinformatics-Cookbook/master/datasets/ch3"
+# change "Chapter03" to "ch3"
 fa_file = "plastid_genomes.fa"
 if (!file.exists(fa_file)) {
   download.file(file.path(remote_folder,fa_file),fa_file)
