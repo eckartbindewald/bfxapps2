@@ -1,0 +1,128 @@
+---
+title: "Bio3D R pagage"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## bio3d R package
+
+```{r}
+# install.packages("bio3d)
+library(bio3d)
+```
+
+
+```{r}
+pdbfile = system.file("examples/1hel.pdb", package="bio3d") 
+pdb <- read.pdb( pdbfile)
+x = read.pdb("4dfr.pdb")
+names(x)
+```
+
+## Data structure "atom"
+
+```{r}
+x[["atom"]]
+```
+
+
+## Data structure "xyz"
+
+```{r}
+x[["xyz"]]
+```
+
+## Selecting Atoms with "atom.select"
+
+```{r}
+# Select protein atoms of chain A
+chaina <- atom.select(pdb, "protein", chain="A")
+```
+
+## Selecting Atoms 
+
+```{r}
+# Select all C-alpha atoms with residues numbers between 43 and 54
+sele <- atom.select(pdb, "calpha", resno=43:54, verbose=TRUE)
+# Access the PDB data with the selection indices
+print( pdb$atom[ sele$atom, "resid" ] )
+```
+
+## Create PDB Data Structure Based on Selection
+
+```{r}
+# Trim PDB to selection
+ca.pdb <- trim.pdb(pdb, sele)
+ca.pdb
+```
+
+## Exercise
+
+* Select backbone atoms
+* Select residue numbers 1-5
+* Select atom number 1-30
+
+## Solution 1: Use all selectors at once
+
+```{r}
+backbone <- atom.select(pdb,"backbone", resno=1:5, eleno=1:30)
+head(pdb$atom[backbone$atom, ], n=100) 
+pdb_backbone <- trim.pdb(pdb, backbone)
+```
+
+## Solution 1: Use all selectors at once
+
+```{r}
+backbone_selection <- atom.select(pdb,"backbone")
+resno_selection<- atom.select(pdb,"protein", resno=1:5)
+eleno_selection <- atom.select(pdb,"protein", eleno=1:30)
+combo_selection <- combine.select(backbone_selection, resno_selection, eleno_selection, operator = "AND")
+
+head(pdb$atom[backbone$atom, ], n=100) 
+pdb_backbone_combo <- trim.pdb(pdb, combo_selection)
+pdb_backbone_combo
+```
+
+## Exercise:
+
+* Try combine.select but use operator="OR"
+
+```{r}
+pdb_backbone_or <- trim.pdb(pdb, combo_selection_or)
+# write.pdb(pdb_backbone_or, file="~/pdb_backbone_or.pdb")
+```
+
+## Visualize 
+
+`http://jena3d.leibniz-fli.de/`
+
+
+
+## Aligning PDB Structures
+
+```{r}
+root = system.file(package="bfxapps2")
+pdbfile = file.path(root, "extdata","pdb", "1xwc.pdb")
+pdbfile2 = file.path(root, "extdata","pdb", "3trx.pdb")
+stopifnot(file.exists(pdbfile))
+stopifnot(file.exists(pdbfile2))
+a <- read.pdb(pdbfile)
+b <- read.pdb(pdbfile2)
+stopifnot(file.exists(pdbfile))
+# download.file(pdbfile, "1xwc.pdb")
+```
+
+## Aligning PDB Structures
+
+```{r}
+# aln <- pdbaln(list("1xwc"=a, "3trx"=b))
+# aln
+```
+
+
+
+
+
