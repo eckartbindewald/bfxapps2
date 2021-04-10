@@ -1,7 +1,8 @@
 Package: bfxapps2
 Type: Package
 Title: R Bioinformatics Applications
-Version: 0.2.0
+Version: 0.3.0
+Date: 2021-04-09
 Author: Eckart Bindewald
 Maintainer: Eckart Bindewald <bindewald@hood.edu>
 Description: This R package supports the course Bioinformatics Applications II. This course encompasses the processing of high-throughput sequencing experiment data (RNA-Seq, DNA-Seq etc), protein sequence data, Metagenomics, Proteomics, machine learning and many general bioinformatics and data science skills.
@@ -10,3 +11,5 @@ Encoding: UTF-8
 LazyData: true
 Suggests: 
     testthat
+Depends: 
+    R (>= 2.10),Biostrings, dplyr, ggplot2
