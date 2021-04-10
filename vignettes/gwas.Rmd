@@ -27,7 +27,7 @@ if (!require(VariantAnnotation)) {
 library(rrBLUP)
 library(VariantAnnotation)
 
-remote_folder="https://raw.githubusercontent.com/PacktPublishing/R-Bioinformatics-Cookbook/master/datasets/ch2"
+remote_folder="https://raw.githubusercontent.com/PacktPublishing/R-Bioinformatics-Cookbook/master/datasets/ch2" # was Chapter02
 vcf_file = "small_sample.vcf"
 if (!file.exists(vcf_file)) {
   download.file(file.path(remote_folder,vcf_file),vcf_file)
@@ -115,6 +115,17 @@ phenotypes
 gresult=GWAS(phenotypes, genotypes, plot=FALSE)
 gresult
 ```
+
+## Visualizing Manhattan Plot
+
+```{r}
+library(dplyr)
+library(qqman)
+gresult2 <- gresult %>% rename(SNP=marker, CHR=chrom, BP=pos) %>% mutate(CHR=as.numeric(CHR), P=10^(-score)) %>% mutate(score=NULL)
+manhattan(gresult2, xlim=c(10000,20000))
+```
+
+
 
 ## Practical Exercise
 
