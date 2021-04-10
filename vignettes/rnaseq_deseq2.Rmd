@@ -94,3 +94,6 @@ dds <- DESeq(dds)
 # res <- results(dds, contrast=c("stage","L2Larvae","L1Larvae"))
 # head(res)
 ```
+
+
+
