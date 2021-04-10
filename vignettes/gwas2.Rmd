@@ -115,6 +115,10 @@ manhattan(gwasResults %>% filter(CHR==3),xlim=c(300,400), annotatePval = TRUE)
 * Given columns: marker, chrom, pos, score
 * Write a function that converts between those formats!
 
+* visualize output of GWAS function in vignette gwas.Rmd
+* limit the x-axis of the output to the range 10000-20000
+
+
 ```{r include=FALSE}
 # gresult2 <- (gresult %>% rename(SNP=marker,CHR=chrom,BP=pos) %>% mutate(CHR=as.numeric(as.character(CHR)), P=(1-pnorm(score))) %>% select(SNP,CHR,BP,P))
 ```
