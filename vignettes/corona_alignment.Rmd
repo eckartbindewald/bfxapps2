@@ -22,8 +22,11 @@ library(DECIPHER)
 ## Download Data
 
 ```{r}
-remote_folder="/Users/eckart/rstudio/bfxapps2/inst/extdata/coronaviridae"
-# https://raw.githubusercontent.com/PacktPublishing/R-Bioinformatics-Cookbook/master/datasets/Chapter03"
+
+root <- system.file(package="bfxapps2")
+stopifnot(file.exists(root))
+remote_folder = file.path(root, "extdata/coronaviridae")
+# https://raw.githubusercontent.com/PacktPublishing/R-Bioinformatics-Cookbook/master/datasets/ch3"
 fa_file = file.path(remote_folder,"coronaviridae.fasta") # "plastid_genomes.fa"
 # if (!file.exists(fa_file)) {
 #  download.file(file.path(remote_folder,fa_file),fa_file)
