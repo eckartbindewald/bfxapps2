@@ -1,0 +1,92 @@
+---
+title: "Analyzing Single Variant"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(knitr)
+library(dplyr)
+```
+
+## Inspect Data
+
+```{r}
+library(bfxapps2)
+data(singlevariant)
+variant = singlevariant
+kable(head(variant))
+variant$Age = 20*rnorm(nrow(variant)) + 35
+variant$DiseaseScore2 = variant$DiseaseScore + variant$Age * 0.1 * runif(nrow(variant))
+```
+
+## Compute Number of Variant Allels
+
+* This variant describes an C->G substitution. "0" stands for C, "1" stands for G at that position
+* We can have allele 1 or 2 or both be reference or alternative sequence
+* Assumption that phenotype is more pronounced the higher the number of variant alleles 
+* Number of variant alleles?
+
+## Add Column Corresponsing to Number of Variant Alleleles
+
+
+```{r}
+variant$A12 = variant$A1 + variant$A2
+```
+
+## Visualize Data: Scatter Plot
+
+```{r}
+library(ggplot2)
+ggplot(variant, aes(x=A12, y=DiseaseScore2)) + geom_point()
+```
+
+## Visualize Data: Box-Plot
+
+```{r}
+library(ggplot2)
+ggplot(variant, aes(x=factor(A12), y=DiseaseScore2)) + geom_boxplot()
+```
+
+
+## Your Job: Improve Output!
+
+* Try to change this plot to make it closer to publication-quality
+
+```{r}
+library(ggplot2)
+ggplot(variant, aes(x=factor(A12), y=DiseaseScore2)) + geom_point()
+```
+
+## Add Linear Regression in Plot
+
+```{r}
+ggplot(variant, aes(x=factor(A12), y=DiseaseScore2)) + geom_point() + geom_smooth(method="lm")
+```
+
+## Linear Regression Data
+
+```{r}
+lm(DiseaseScore2 ~ A12, data = variant) %>% broom::tidy() %>% kable()
+```
+
+## Dependence on Age?
+
+```{r}
+ggplot(variant, aes(x=Age, y=DiseaseScore2)) + geom_point()
+```
+
+## Find out if Dependence on Age is Statistically Significant
+
+```{r}
+ggplot(variant, aes(x=Age, y=DiseaseScore2)) + geom_point()
+```
+
+## Building Adjusted Models
+
+```{r}
+lm(DiseaseScore2 ~ A12 + Age, data = variant) %>% broom::tidy() %>% kable()
+```
+
+
+

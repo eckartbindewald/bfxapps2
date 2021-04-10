@@ -1,0 +1,102 @@
+---
+title: "Analyzing A Single Variant"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(knitr)
+library(dplyr)
+```
+
+## Data Set: A C->G variant
+
+* "0" Reference sequence: C
+* "1" Alternate sequence: G
+
+## Reading Data
+
+```{r}
+variant <- read.csv("singlevariant.csv", stringsAsFactors = FALSE)
+kable(head(variant,n=20))
+```
+
+
+## Visualizing Disease Scores
+
+```{r}
+library(ggplot2)
+library(ggpubr)
+genotypes <- c("CC", "CG", "GG")
+variant$Genotype <- factor(genotypes[variant$A12 + 1])
+ggplot(variant, aes(x=A12, y=DiseaseScore)) + geom_point() + geom_smooth(method="lm") + theme_pubclean(base_size=20) + xlab("Genotype") + ylab("Disease Score 2")
+
+```
+
+## Box-Whisker Plot of Variant Data
+
+```{r}
+
+# ggplot(variant, aes(x=Genotype, y=DiseaseScore)) + geom_boxplot() + geom_point(color="red", alpha=0.5) + theme_pubclean(base_size=20) + xlab("Genotype") + ylab("Disease Score 2")
+ggpubr::ggboxplot(data=variant, x="Genotype", y="DiseaseScore",add = "jitter")
+```
+
+## Applying T-Test with `t.test` 
+
+```{r}
+scoresCC <- variant[variant$A12==0, "DiseaseScore"]
+scoresCGandGG <- variant[variant$A12>0, "DiseaseScore"]
+ttestresult <- t.test(scoresCC, scoresCGandGG )
+ttestresult
+```
+
+## Using R Package `broom`
+
+```{r}
+# install.packages("broom")
+ttestresult %>% broom::tidy() %>% kable()
+```
+
+## Why makes combining CG and GG more sense than comining CC and CG
+
+* Reference sequence: C
+* Alternate sequence: G
+
+## Linear Model
+
+```{r}
+linmodel <- lm(DiseaseScore ~ A12, data=variant)
+summary(linmodel)
+```
+
+## Linear Model with Broom
+
+```{r}
+linmodel %>% broom::tidy() %>% kable()
+```
+
+
+## Visualizing Age versus DiseaseScore
+
+```{r}
+ggplot(variant, aes(x=Age, y=DiseaseScore)) + geom_point() + geom_smooth(method="lm")
+```
+
+## Linear Model DiseaseScore as function of Age
+
+```{r}
+lm(DiseaseScore ~ Age, data=variant) %>% broom::tidy() %>% kable()
+```
+
+## Visuializing Age vs A12
+
+```{r}
+ggplot(variant, aes(x=Genotype, y=Age)) + geom_boxplot()
+```
+
+## Linear Model of Copy number versus Disease Score 2 Adjusted for Age
+
+```{r}
+linmodel <- lm(DiseaseScore ~ A12 + Age, data=variant)
+linmodel %>% broom::tidy() %>% kable()
+```
