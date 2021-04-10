@@ -1,8 +1,8 @@
 ---
 title: "Variant Analysis with R package seqCAT"
-package: "`r BiocStyle::pkg_ver('seqCAT')`"
 output:
-    powerpoint_presentation
+  ioslides_presentation: default
+  powerpoint_presentation: default
 ---
 
 ```{r Options, echo = FALSE}
