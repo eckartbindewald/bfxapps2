@@ -1,82 +1,51 @@
 ---
-title: "Trees from Sequence Alignments"
-author: "Eckart Bindewald"
-date: "4/7/2020"
-output:
-  powerpoint_presentation
+title: "Constructing Trees from Alignments"
+output: ioslides_presentation
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE)
+knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Reconstructure Trees from Sequence Alignments
-
-* We learned how to visualize logical trees using R package ggtree
-* Sequence alignments contain information about similarities between sequences
-* R function phangorn can help to create trees from alignments
-
-## Preliminaries
+## Reading Tree Structures and Preliminaries
 
 ```{r}
+#Reconstructing trees from alignments using phangorn
+
 library(Biostrings)
-library(msa) # BiocManager::install("msa)
-library(phangorn) # install.packages("phangorn")
+library(msa)
+library(phangorn)
+
+remote_dir="https://raw.githubusercontent.com/PacktPublishing/R-Bioinformatics-Cookbook/master"
+seqs <- readAAStringSet(file.path(remote_dir, "datasets", "ch4", "abc.fa"))
 ```
 
-## Download Data
+## Aligning Sequences
 
 ```{r}
-remote_folder="https://raw.githubusercontent.com/PacktPublishing/R-Bioinformatics-Cookbook/master/datasets/Chapter04"
-fa_file = "abc.fa"
-if (!file.exists(fa_file)) {
-  download.file(file.path(remote_folder,fa_file),fa_file)
-}
-stopifnot(file.exists(fa_file))
+aln <- msa::msa(seqs, method=c("ClustalOmega"))
 ```
 
-## Read in Data
+## Contructing Trees from Alignment
 
 ```{r}
-seqs <- readAAStringSet(fa_file)
-aln <- msa::msa(seqs,method="ClustalOmega") # convert to alignment datastructure
-```
-
-## Create Distance Matrix
-
-```{r}
-aln <- phangorn::as.phyDat(aln, type="AA")
+aln <- as.phyDat(aln, type = "AA")
 dist_mat <- dist.ml(aln)
 upgma_tree <- upgma(dist_mat)
-```
-
-## Visualizing Distance Matrix
-
-```{r}
-image(as.matrix(dist_mat))
-```
-
-## UPGMA trees
-
-* UPGMA: unweighted pair group method with arithmetic mean
-* same as "average linkage clustering"
-* Distance to a cluster of sequences is same as average of distances to individual members of that cluster
-
-```{r}
-upgma_tree <- phangorn::upgma(dist_mat)
 plot(upgma_tree, main="UPGMA")
 ```
 
-## Visualizing Neighbor-Joining Tree
+## Neighbor Joinging trees
 
 ```{r}
-nj_tree <- phangorn::NJ(dist_mat)
-plot(nj_tree, "unrooted", main="NJ")
+nj_tree <- NJ(dist_mat)
+plot(nj_tree,"unrooted", main="NJ")
 ```
 
-## Bootstrapping
+## Boostrapping
 
 ```{r}
-bootstraps <- bootstrap.phyDat(aln, FUN=function(x){NJ(dist.ml(x))}, bs=100)
-plotBS(nj_tree, bootstraps, p=10)
+fit <- pml(nj_tree, aln)
+bootstraps <- bootstrap.phyDat(aln,FUN=function(x) { NJ(dist.ml(x)) } , bs=100)
+plotBS(nj_tree, bootstraps, p = 10)
 ```

@@ -1,0 +1,65 @@
+---
+title: "Visualizing Trees"
+output:
+  ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Reading Tree Structures
+
+```{r}
+# BiocManager::install("ggtree")
+
+library(ggplot2)
+library(ggtree)
+
+remote_folder="https://raw.githubusercontent.com/PacktPublishing/R-Bioinformatics-Cookbook/master"
+itol <- ape::read.tree(file.path(remote_folder, "datasets", "ch4", "itol.nwk"))
+```
+
+## Default Tree Visualization
+
+```{r}
+ggtree(itol)
+```
+
+## Circular Visualization
+
+```{r}
+ggtree(itol, layout = "circular")
+```
+
+
+## Flipping Coordinates
+
+```{r}
+ggtree(itol) + coord_flip() + scale_x_reverse()
+```
+
+## Using `geom_tiplab`
+
+```{r}
+ggtree(itol) + geom_tiplab( color = "blue", size = 2)
+```
+
+## Using `geom_strip`
+
+```{r}
+ggtree(itol, layout = "circular") + geom_strip(13,14, color="red", barsize = 1)
+```
+
+## Unrooted Trees
+
+```{r}
+ggtree(itol, layout = "unrooted") + ggtree::geom_hilight(node = 11, fill = "steelblue") # _encircle
+```
+
+## MRCA
+
+```{r}
+# MRCA(itol, tip=c("Photorhabdus_luminescens", "Blochmannia_floridanus"))
+```
+

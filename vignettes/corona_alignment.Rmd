@@ -3,7 +3,7 @@ title: "Whole-Genome Alignments"
 author: "Eckart Bindewald"
 date: "4/14/2020"
 output:
-  ioslides_presentation
+  powerpoint_presentation
 ---
 
 ```{r setup, include=FALSE}

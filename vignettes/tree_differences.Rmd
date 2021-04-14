@@ -1,0 +1,45 @@
+---
+title: "Tree Differences"
+output:
+  ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Reading Tree Structures
+
+```{r}
+#Quantifying differences between trees with treespace
+
+#BiocManager::install("adegraphics")
+#BiocManager::install("treespace")
+
+library(ape)
+library(adegraphics)
+library(treespace)
+treefiles <- list.files(file.path(getwd(), "datasets", "ch4", "gene_trees"),full.names = TRUE)
+tree_list <- lapply(treefiles, read.tree)
+class(tree_list) <- "multiPhylo"
+```
+
+## Comparing Trees
+
+```{r}
+comparisons <- treespace(tree_list, nf = 3)
+adegraphics::table.image(comparisons$D, nclass=25)
+```
+
+## Using `plotGroves`
+
+```{r}
+plotGroves(comparisons$pco, lab.show=TRUE, lab.cex=1.5)
+```
+
+## Using `plotGroves` with `findGroves`
+
+```{r}
+groves <- findGroves(comparisons, nclust = 4)
+plotGroves(groves)
+```

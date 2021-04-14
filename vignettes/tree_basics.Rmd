@@ -1,0 +1,64 @@
+---
+title: "Reading And Writing Tree Structures"
+output:
+  ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Preliminaries
+
+```{r}
+#Reading and writing varied tree formats with ape and treeio
+
+library(ape)
+
+remote_dir="https://raw.githubusercontent.com/PacktPublishing/R-Bioinformatics-Cookbook/master"
+```
+
+## Reading Newickk Format
+
+```{r}
+newick <-ape::read.tree(file.path(remote_dir, "datasets", "ch4", "mammal_tree.nwk"))
+```
+
+## Reading Nexus Format
+
+```{r}
+nexus <-ape::read.nexus(file.path(remote_dir, "datasets", "ch4", "mammal_tree.nexus"))
+```
+
+#BiocManager::install("treeio")
+## Reading Beast and Raxml with treeio
+
+```{r}
+library(treeio)
+beast <- read.beast(file.path(remote_dir, "datasets", "ch4", "beast_mcc.tree"))
+raxml <- read.raxml(file.path(remote_dir, "datasets", "ch4", "RAxML_bipartitionsBranchLabels.H3"))
+```
+
+## Classes of Tree Structures
+
+```{r}
+class(newick)
+class(nexus)
+class(beast)
+class(raxml)
+```
+
+## Converting Tree Formats
+
+```{r}
+beast_phylo <- treeio::as.phylo(beast)
+newick_tidytree <- treeio::as.treedata(newick)
+```
+
+## Writing Tree Structures
+
+```{r}
+# treeio::write.beast(newick_tidytree,file = "mammal_tree.beast")
+ape::write.nexus(beast_phylo, file = "beast_mcc.nexus")
+plot(beast_phylo)
+```
