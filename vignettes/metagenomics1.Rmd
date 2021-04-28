@@ -1,0 +1,56 @@
+---
+title: "Metagenomics 1"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Preliminaries
+
+```{r}
+remote_dir="https://raw.githubusercontent.com/PacktPublishing/R-Bioinformatics-Cookbook/master"
+if (!require(phyloseq)) {
+  BiocManager::install("phyloseq")
+}
+library(phyloseq)
+
+##hdf5
+biom_file <- file.path(remote_dir, "datasets", "ch5", "rich_sparse_otu_table.biom")
+qiime <- import_biom(biom_file)
+str(qiime)
+print(qiime@sam_data)
+
+```
+
+## Visualization
+
+```{r}
+#        BarcodeSequence  LinkerPrimerSequence BODY_SITE Description
+#Sample1    CGCTTATCGAGA CATGCTGCCTCCCGTAGGAGT       gut   human gut
+#Sample2    CATACCAGTAGC CATGCTGCCTCCCGTAGGAGT       gut   human gut
+#Sample3    CTCTCTACCTGT CATGCTGCCTCCCGTAGGAGT       gut   human gut
+#Sample4    CTCTCGGCCTGT CATGCTGCCTCCCGTAGGAGT      skin  human skin
+#Sample5    CTCTCTACCAAT CATGCTGCCTCCCGTAGGAGT      skin  human skin
+#Sample6    CTAACTACCAAT CATGCTGCCTCCCGTAGGAGT      skin  human skin
+
+tax_table(qiime)
+otu_table(qiime)
+sample_data(qiime)
+```
+
+
+## Visualization 2
+
+```{r}
+
+mothur <- import_mothur(
+  mothur_list_file = file.path(remote_dir, "datasets", "ch5", "esophagus.fn.list"),
+  mothur_group_file = file.path(remote_dir, "datasets", "ch5", "esophagus.good.groups"),
+  mothur_tree_file = file.path(remote_dir, "datasets", "ch5", "esophagus.tree")
+)
+otu_table(mothur)
+
+```

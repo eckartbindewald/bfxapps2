@@ -1,0 +1,59 @@
+---
+title: "metagenomics5"
+output:
+  ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Computing sample diversity 
+
+```{r}
+
+# install.packages("corrplot")
+library(corrplot)
+library(vegan)
+remote_dir="https://raw.githubusercontent.com/PacktPublishing/R-Bioinformatics-Cookbook/master"
+biom_file <- file.path(remote_dir, "datasets", "ch5", "rich_high_count_otu.biom")
+taxdata <- metacoder::parse_qiime_biom(biom_file)
+otu_table <- taxdata$data$otu_table[, paste0("Sample", 1:6)]
+# A tibble: 5 x 6
+#Sample1 Sample2 Sample3 Sample4 Sample5 Sample6
+#1      24   15010   22426   20482    4574   13424
+#2     872       0   16811    5174    4280    8042
+#3       0       7     100      50      25      19
+#4     875   16654   31109    2410       0   13815
+#5    1270   12857    7267    3675    4159       0
+
+alpha_diversity <- diversity(otu_table, MARGIN=2, index="simpson")
+#  Sample1   Sample2   Sample3   Sample4   Sample5   Sample6 
+#0.6605111 0.6631140 0.7009386 0.5393156 0.6674042 0.6503205 
+```
+
+
+## Bar Plot
+
+```{r}
+barplot(alpha_diversity)
+
+between_sample <- vegdist(t(otu_table), index = "bray")
+between_sample_m <- as.matrix(between_sample, ncol = 6)
+#Sample1   Sample2   Sample3   Sample4   Sample5   Sample6
+#Sample1 0.0000000 0.9088062 0.9246848 0.8253904 0.7305803 0.9076185
+#Sample2 0.9088062 0.0000000 0.3629306 0.4470053 0.6963485 0.3173824
+#Sample3 0.9246848 0.3629306 0.0000000 0.4193637 0.7126643 0.3752931
+#Sample4 0.8253904 0.4470053 0.4193637 0.0000000 0.4399161 0.3731797
+#Sample5 0.7305803 0.6963485 0.7126643 0.4399161 0.0000000 0.6328768
+#Sample6 0.9076185 0.3173824 0.3752931 0.3731797 0.6328768 0.0000000
+
+```
+
+
+## Visualization
+
+```{r}
+corrplot::corrplot(between_sample_m, method="circle", type = "upper", diag = FALSE )
+```
+

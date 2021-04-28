@@ -1,0 +1,28 @@
+---
+title: "metagenomics4"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Visualizing taxonomic abundances with heat trees
+
+```{r}
+
+library(metacoder)
+library(RColorBrewer)
+remote_dir="https://raw.githubusercontent.com/PacktPublishing/R-Bioinformatics-Cookbook/master"
+
+biom_file <- file.path(remote_dir, "datasets", "ch5", "rich_high_count_otu.biom")
+taxdata <- parse_qiime_biom(biom_file)
+str(taxdata)
+```
+
+## Visualization
+
+```{r}
+heat_tree(taxdata, node_label = taxon_names, node_size = n_obs, node_color = n_supertaxa, layout = "gem", title = "sample heat tree", node_color_axis_label = "Number of Supertaxa", node_size_axis_label = "Number of OTUs", node_color_range = brewer.pal(5, "Greens"))
+```
+
