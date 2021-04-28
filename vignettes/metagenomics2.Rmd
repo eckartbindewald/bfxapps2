@@ -1,5 +1,5 @@
 ---
-title: "Metagenomics 2"
+title: "Metagenomics 2: Rarefying counts to correct for sample differences using metacoder"
 output: ioslides_presentation
 ---
 

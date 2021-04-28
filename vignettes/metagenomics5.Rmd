@@ -1,5 +1,5 @@
 ---
-title: "metagenomics5"
+title: "Metagenomics5: Computing sample diversity with vegan"
 output:
   ioslides_presentation
 ---

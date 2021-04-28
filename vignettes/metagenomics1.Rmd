@@ -1,5 +1,5 @@
 ---
-title: "Metagenomics 1"
+title: "Metagenomics 1: Loading hierarchical taxonomic data using phyloseq"
 output: ioslides_presentation
 ---
 

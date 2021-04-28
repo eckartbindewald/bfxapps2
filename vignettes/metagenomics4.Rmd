@@ -1,5 +1,5 @@
 ---
-title: "metagenomics4"
+title: "Metagenomics 4: Visualizing taxonomic abundances with heat trees in metacoder"
 output: ioslides_presentation
 ---
 
