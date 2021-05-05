@@ -1,0 +1,72 @@
+---
+title: "Proteomics: From spectrum to Annotation (1)"
+output:
+  ioslides_presentation:
+    smaller: yes
+---
+
+  
+```{r setup, include=FALSE}
+library(dplyr)
+library(knitr)
+knitr::opts_chunk$set(echo = TRUE,message=FALSE, warning=FALSE)
+remote_dir="https://raw.githubusercontent.com/PacktPublishing/R-Bioinformatics-Cookbook/master/datasets/ch6"
+```
+
+## Install Packages
+
+```{r}
+if (!require(mzR)) {
+  BiocManager::install("mzR")
+}
+if (!require(MSnbase)) {
+  BiocManager::install("MSnbase")
+}
+if (!require(MSnID)) {
+  BiocManager::install("MSnID")
+}
+if (!require(EnsDb.Hsapiens.v86)) {
+  BiocManager::install("EnsDb.Hsapiens.v86")
+}
+if (!require(protViz)) {
+  BiocManager::install("protViz")
+}
+library(mzR)
+library(MSnbase)
+```
+
+## 2. Load the files into objects
+
+```{r}
+mzxml_file <- "threonine_i2_e35_pH_tree.mzXML" 
+if (!file.exists(mzxml_file)) {
+  download.file(file.path(remote_dir, mzxml_file), mzxml_file)
+}
+ms1 <- openMSfile(mzxml_file)
+mzdata_file <- "HAM004_641fE_14-11-07--Exp1.extracted.mzdata"
+if (!file.exists(mzdata_file)) {
+  download.file(file.path(remote_dir, mzdata_file), mzdata_file)
+}
+ms2 <- openMSfile(mzdata_file)
+mzml_file <- "MM8.mzML"
+if (!file.exists(mzml_file)) {
+  download.file(file.path(remote_dir, mzml_file), mzml_file)
+}
+ms3 <- openMSfile(mzml_file)
+```
+
+## 3. View the metadata where available
+
+```{r}
+runInfo(ms3)
+```
+
+## 4. Plot the spectra:
+
+```{r}
+msn_exp <- MSnbase::readMSData(mzxml_file)
+MSnbase::plot(msn_exp, full = TRUE)
+MSnbase::plot(msn_exp[5], full = TRUE)
+```
+
+

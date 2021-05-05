@@ -1,0 +1,116 @@
+---
+title: "Proteomics: From spectrum to Annotation (2)"
+output:
+  ioslides_presentation:
+    smaller: yes
+---
+
+  
+```{r setup, include=FALSE}
+library(dplyr)
+library(knitr)
+knitr::opts_chunk$set(echo = TRUE,message=FALSE, warning=FALSE)
+
+## Install Pacakages 
+```
+
+
+## Recipe: Viewing proteomics data in a genome browser
+
+* UCSC Genome Browser allows uploading and visualization of genomic intervals
+* We need to prepare the data according to the UCSC conventions
+* Chromsome naming conventions EBI (1, 2, ... X, Y, MT)
+* Chromsome naming conventions EBI (chr1, chr2, ... chrX, chrY, chrM)
+
+## 1. Load the libraries:
+
+```{r}
+library(MSnID)
+library(EnsDb.Hsapiens.v86)
+library(rtracklayer)
+
+```
+
+## 2. Create and populate the search file object: 
+
+```{r}
+remote_dir=file.path("https://raw.githubusercontent.com",
+ "PacktPublishingR-Bioinformatics-Cookbook/master/datasets/ch6")
+msnid_file <- "HeLa_180123_m43_r2_CAM.mzid.gz"
+if (!file.exists(msnid_file)) {
+  download.file(file.path(remote_dir,
+                          msnid_file), msnid_file)
+}
+msnid <- MSnID()
+msnid <- read_mzIDs(msnid, msnid_file)
+```
+
+## 3. Extract rows containing useful hits and columns containing useful information:
+
+```{r}
+real_hits <- msnid@psms[! msnid@psms$isDecoy, ]
+required_info <- real_hits[, c("spectrumID", "pepSeq",
+                               "accession", "start", "end")]
+```
+
+## 4. Extract the Uniprot IDs from the accession column: 
+
+```{r}
+uniprot_ids <- unlist(lapply(strsplit(required_info$accession,
+                                      "\\|"), function(x){x[2]}) )
+uniprot_ids <- uniprot_ids[!is.na(uniprot_ids)]
+
+```
+
+## 5. Create a database connection and obtain genes matching our Uniprot IDs
+
+```{r}
+edb <- EnsDb.Hsapiens.v86
+genes_for_prots <- genes(edb,
+                         filter = UniprotFilter(uniprot_ids),
+                         columns = c("gene_name", "gene_seq_start", "gene_seq_end",
+                                     "seq_name"))
+```
+
+## Tabular View
+
+```{r}
+genes_for_prots %>% head()
+```
+
+## Examine involved chromosome (sequence) names
+
+```{r}
+seqnames(genes_for_prots) %>% as.vector() %>% unique() %>% sort() %>%
+  head() %>% kable()
+```
+
+## Filtering out Chromosomes with Specific Names
+
+```{r}
+snames <- as.vector(seqnames(genes_for_prots) )
+genes_for_prots <- genes_for_prots[nchar(snames) <= 2 & snames != "MT"] # like chr19 but not longer
+# two conventions: chromosome chrM on UCSF, and "MT" on EBI
+
+```
+
+## 6. Set up the genome browser track: 
+
+```{r}
+track <- rtracklayer::GRangesForUCSCGenome("hg38",
+                              paste0("chr",seqnames(genes_for_prots)),
+                              ranges=ranges(genes_for_prots),
+                              strand=strand(genes_for_prots),
+                              genes_for_prots$gene_name,
+                              genes_for_prots$uniprot_id )
+```
+
+## 7. Set up the browser session and view:
+
+```{r}
+session <- browserSession("UCSC")
+track(session, "my_peptides") <- track
+first_peptide <- track[1]
+view <- browserView(session, first_peptide * -5, pack =
+                      "my_peptides")
+```

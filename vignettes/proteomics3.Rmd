@@ -1,0 +1,150 @@
+---
+title: "Proteomics: From spectrum to Annotation (3)"
+output:
+  ioslides_presentation:
+    smaller: yes
+---
+
+  
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,message=FALSE, warning=FALSE)
+```
+
+## Preliminaries
+
+```{r}
+library(dplyr)
+library(knitr)
+
+library(mzR)
+library(MSnbase)
+remote_dir=file.path("https://raw.githubusercontent.com/PacktPublishing",
+                      "R-Bioinformatics-Cookbook/master/datasets/ch6")
+```
+
+## Recipe: Visualizing distributions of peptide hit counts to find thresholds
+
+## 1. Load the libraries and data:
+
+```{r}
+library(MSnID)
+library(data.table)
+library(dplyr)
+library(ggplot2)
+
+msnid_file <- "HeLa_180123_m43_r2_CAM.mzid.gz"
+if (!file.exists(msnid_file)) {
+  download.file(file.path(remote_dir,msnid_file), msnid_file)
+}
+msnid <- MSnID()
+msnid <- read_mzIDs(msnid, msnid_file)
+peptide_info <- as(msnid, "data.table")
+```
+
+## 2. Filter out decoy data rows and get a count of every time a peptide appears:
+
+```{r}
+  per_peptide_counts <- peptide_info %>%
+  filter(isDecoy == FALSE) %>%
+  group_by(pepSeq) %>%
+  summarise(count = n() ) %>%
+  mutate(sample = rep("peptide_counts", length(counts) ) )
+## 3. Create a violin and jitter plot of the hit counts:
+  g <- per_peptide_counts %>% ggplot() + aes( sample, count) + geom_jitter() + geom_violin() +
+  scale_y_log10()
+```
+
+## Peptide Counts
+
+```{r}
+print(g)
+```
+
+## 4. Create a plot of cumulative hit counts for peptides sorted by hit count:
+
+```{r}
+  g2 <- per_peptide_counts %>% arrange(count) %>%
+   mutate(cumulative_hits = cumsum(count), peptide = 1:length(count)) %>%
+   ggplot() + aes(peptide, cumulative_hits) + geom_line()
+```
+
+## Create a plot of cumulative hit counts for peptides sorted by hit count
+
+```{r}
+print(g2)
+```
+
+## 5. Filter out very low and very high peptide hits and then replot them:
+
+```{r}
+  filtered_per_peptide_counts <- per_peptide_counts %>% filter(count >= 5, count <= 2500)
+  g3 <- filtered_per_peptide_counts %>% ggplot() + aes( sample, count) +
+    geom_jitter() + geom_violin() + scale_y_log10()
+```
+
+## Visualization of cumulative hit counts for peptides sorted by hit count
+
+```{r}
+print(g3) 
+```
+
+## Recipe: Converting MS formats to move data between tools
+
+## 1 :Load the library and import the source data file:
+
+```{r}  
+  library(mzR) 
+mzxml_file <- "threonine_i2_e35_pH_tree.mzXML" 
+if (!file.exists(mzxml_file)) {
+  download.file(file.path(remote_dir, mzxml_file), mzxml_file)
+}
+mzdata <- openMSfile(mzxml_file)  # file "threonine_i2_e35_pH_tree.mzXML"
+```
+
+## 2. Extract the header and peak data: 
+
+```{r}  
+header_info <- header(mzdata) 
+peak_data_list <- spectra(mzdata)
+```
+
+## 3. Write the data into a new format file:
+
+```{r}  
+writeMSData(peak_data_list, file.path(remote_dir, "out.mz"),
+            header = header_info, outformat = "mzml", rtime_seconds = TRUE)
+```  
+  
+## Recipe: Matching spectra to peptides for verification with protViz
+  
+## 1. Load in the libraries and the MS data:
+  
+```{r}  
+  library(mzR)
+  library(protViz) 
+  mzml_file <- "MM8.mzML"  # was downloaded earlier
+  ms <- openMSfile(mzml_file) 
+```
+
+## 2. Extract the peaks and retention time from the spectrum:
+  
+```{r}  
+  p <- peaks(ms,2) 
+  spec <- list(mZ = p[,1], intensity = p[,2]) 
+```
+
+## Visualizing Spectrum
+
+```{r}
+df <- data.frame(cbind(mZ=spec$mZ, intensity=spec$intensity))
+df %>% ggplot(aes(x=mZ, y=intensity)) + geom_line()
+```
+
+## 3. Create a plot of theoretical versus observed ion masses:
+
+```{r}
+m <- psm("PEPTIDESEQ", spec, plot=TRUE)
+```
+
+
+
