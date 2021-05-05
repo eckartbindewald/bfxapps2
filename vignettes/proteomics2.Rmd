@@ -10,8 +10,6 @@ output:
 library(dplyr)
 library(knitr)
 knitr::opts_chunk$set(echo = TRUE,message=FALSE, warning=FALSE)
-
-## Install Pacakages 
 ```
 
 
@@ -35,7 +33,7 @@ library(rtracklayer)
 
 ```{r}
 remote_dir=file.path("https://raw.githubusercontent.com",
- "PacktPublishingR-Bioinformatics-Cookbook/master/datasets/ch6")
+ "PacktPublishing/R-Bioinformatics-Cookbook/master/datasets/ch6")
 msnid_file <- "HeLa_180123_m43_r2_CAM.mzid.gz"
 if (!file.exists(msnid_file)) {
   download.file(file.path(remote_dir,
