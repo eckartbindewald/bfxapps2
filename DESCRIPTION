@@ -1,8 +1,8 @@
 Package: bfxapps2
 Type: Package
 Title: R Bioinformatics Applications
-Version: 0.3.0
-Date: 2021-04-09
+Version: 0.4.0
+Date: 2021-04-22
 Author: Eckart Bindewald
 Maintainer: Eckart Bindewald <bindewald@hood.edu>
 Description: This R package supports the course Bioinformatics Applications II. This course encompasses the processing of high-throughput sequencing experiment data (RNA-Seq, DNA-Seq etc), protein sequence data, Metagenomics, Proteomics, machine learning and many general bioinformatics and data science skills.
@@ -10,6 +10,7 @@ License: Artistic License
 Encoding: UTF-8
 LazyData: true
 Suggests: 
-    testthat
+    testthat, DECIPHER,DESeq2,EnsDb.Hsapiens.v86,GenomicRanges,IRanges,MSnID,MSnbase,Rsamtools,SummarizedExperiment,VariantAnnotation,VariantTools,adegraphics,ape,bfxapps2,bio3d,bumphunter,csaw,edgeR,ggpubr,ggsci,ggtree,gmapR,knitr,magrittr,mlmm.gwas,msa,muscle,mzR,phangorn,qqman,readr,rrBLUP,rtracklayer,scales,seqCAT,seqinr,treeio,treespace
 Depends: 
     R (>= 2.10),Biostrings, dplyr, ggplot2
+
