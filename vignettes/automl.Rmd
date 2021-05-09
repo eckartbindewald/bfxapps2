@@ -1,0 +1,131 @@
+---
+title: 'AutoML: Automating Machine Learning'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Preliminaries
+
+```{r}
+library(automl)
+library(dplyr)
+```
+
+
+## REGRESSION (predict Iris Sepal.Length given other parameters)
+
+```{r}
+
+data(iris)
+trainmin = 1
+trainmax = 100
+testmin = 101
+testmax = nrow(iris) # == 150
+xmat <- as.matrix(cbind(iris[,2:4], as.numeric(iris$Species)))
+ymat <- iris[,1]
+xmat_train <- xmat[trainmin:trainmax,]
+ymat_train <- ymat[trainmin:trainmax]
+xmat_test <- xmat[testmin:testmax,]
+ymat_test <- ymat[testmin:testmax] # not matrix anymore but simple vector
+amlmodel <- automl_train_manual(Xref = xmat_train, Yref = ymat_train,
+ hpar = list(modexec = 'trainwpso', verbose = FALSE))
+res <- cbind(ymat_test, automl_predict(model = amlmodel, X = xmat_test))
+colnames(res) <- c('actual', 'predict')
+res <- as.data.frame(res) # convert matrix to data frame
+head(res)
+```
+## Visualize Prediction: Correlation: `r cor(res$actual,res$predict)`
+
+```{r}
+library(ggplot2)
+res %>% ggplot(aes(x=actual, y=predict)) + geom_point() + ggpubr::theme_pubclean()
+```
+
+## CLASSIFICATION (predict Species given other Iris parameters)
+
+```{r}
+data(iris)
+Xmat = iris[,1:4]
+lab2pred <- levels(iris$Species)
+lghlab <- length(lab2pred)  # character vector of levels to predict: "setosa"     "versicolor" "virginica" 
+iris$Species <- as.numeric(iris$Species) # convert factor to integers 1,2,3 
+# code to convert class ids 1,2,3 to one-hot encoding:
+Ymat_help <- matrix(seq(from = 1, to = lghlab, by = 1), nrow(Xmat),
+ lghlab, byrow = TRUE)
+# ymat_help looks like:
+#      [,1] [,2] [,3]
+# [1,]    1    2    3
+# [2,]    1    2    3
+# [3,]    1    2    3
+# [4,]    1    2    3
+# [5,]    1    2    3
+# [6,]    1    2    3
+
+Ymat_help2 <- (Ymat_help == as.numeric(iris$Species))
+# ymat_help2 looks like:
+#      [,1]  [,2]  [,3]
+# [1,] TRUE FALSE FALSE
+# [2,] TRUE FALSE FALSE
+# [3,] TRUE FALSE FALSE
+# [4,] TRUE FALSE FALSE
+# [5,] TRUE FALSE FALSE
+# [6,] TRUE FALSE FALSE
+# ...
+# [145,] FALSE FALSE TRUE
+# [146,] FALSE FALSE TRUE
+# [147,] FALSE FALSE TRUE
+# [148,] FALSE FALSE TRUE
+# [149,] FALSE FALSE TRUE
+# [150,] FALSE FALSE TRUE
+Ymat <- Ymat_help2 + 0
+# ymat looks like:
+#     [,1] [,2] [,3]
+# [1,]    1    0    0
+# [2,]    1    0    0
+# [3,]    1    0    0
+# [4,]    1    0    0
+# [5,]    1    0    0
+# [6,]    1    0    0
+# ...
+# [145,]    0    0    1
+# [146,]    0    0    1
+# [147,]    0    0    1
+# [148,]    0    0    1
+# [149,]    0    0    1
+# [150,]    0    0    1
+```
+
+## Splitting into testing and training set
+
+```{r}
+Xmat_train <- Xmat[trainmin:trainmax,]
+Ymat_train <- Ymat[trainmin:trainmax,]
+Xmat_test <- Xmat[testmin:testmax,]
+Ymat_test <- Ymat[testmin:testmax,]
+```
+
+## Training AutoML Models
+
+```{r}
+amlmodel <- automl_train_manual(Xref = Xmat_train, Yref = Ymat_train,
+                hpar = list(modexec = 'trainwpso', verbose = FALSE))
+```
+
+## Evaluating Classification Prediction Performance
+
+```{r}
+result <- cbind(Ymat_test, round(automl_predict(model = amlmodel, X = Xmat_test)))
+colnames(result) <- c(paste('act',lab2pred, sep = '_'),
+ paste('pred',lab2pred, sep = '_'))
+head(result)
+```
+
+## Report Accuracy
+
+```{r}
+apply(result, 1, FUN=function(x) { x[1]==x[4] & x[2] == x[5] & x[3] == x[6]})
+```
+
