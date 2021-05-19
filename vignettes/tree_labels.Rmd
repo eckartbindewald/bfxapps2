@@ -1,0 +1,43 @@
+---
+title: "Tree With Branch Lengths"
+author: "Eckart Bindewald"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(ggtree)
+library(treeio)
+```
+
+With ggtree, it is straight-forward, to label tree tip nodes (with `geom_tiplab`).
+But how can one label tree branch lengths? This is not so obvious and currently
+restricted to certain tree layouts.
+
+In non-circular (default) ggtree layout, the x-coordinate coincides with the 
+need coordinate of the branch labeling. This can be used with the `geom_nodelab`
+function as shown in this example:
+
+```{r}
+file <- system.file("extdata/BEAST", "beast_mcc.tree", package="treeio")
+beast <- read.beast(file)
+beast
+ggtree(beast, aes(color=rate))  +
+    geom_nodelab(aes(x=branch, label=round(length,1)), vjust=-.5, size=3) +
+#      geom_nodelab(aes(x=branch, label=round(posterior, 2)), vjust=-.5, size=3) +
+    geom_tiplab() +
+    scale_color_continuous(low="darkgreen", high="red") +
+    theme(legend.position=c(.1, .8))
+# + geom_range(range='length_0.95_HPD', color='red', alpha=.6, size=2) 
+```
+
+
+## Credits
+
+This page has been adapted from a web page maintained by the author and maintainer of the `ggtree`
+R package (Guangchuang Yu): 
+
+<https://yulab-smu.top/treedata-book/chapter5.html>
